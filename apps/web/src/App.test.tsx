@@ -43,6 +43,10 @@ describe('editor app', () => {
     const active = useEditor.getState().activeLayerId;
     fireEvent.change(screen.getByTestId('cam-mode'), { target: { value: 'fill' } });
     expect(useEditor.getState().cutSettingsByLayer[active].mode).toBe('fill');
+
+    // Machine origin (M2-T07) is wired to the store.
+    fireEvent.change(screen.getByTestId('machine-origin'), { target: { value: 'center' } });
+    expect(useEditor.getState().machineOrigin).toBe('center');
   });
 
   it('applies a material preset to the active layer and can save one back', () => {

@@ -1,5 +1,6 @@
 import type { CutSettings, Toolpath } from 'cam';
 import type { Vec2 } from 'scene';
+import { toMachineMm, type Workspace } from '../coordinate/coordinate';
 
 /**
  * GRBL G-code emitter (development-plan §4.3, M2-T08). Machine output is golden —
@@ -37,10 +38,25 @@ const fmt = (n: number): string => {
 
 const unitScale = (units: MachineConfig['units']): number => (units === 'inch' ? 1 / 25.4 : 1);
 
-/** Emit GRBL G-code for a job. Deterministic (golden-tested). */
-export function emitGcode(job: GcodeJob, machine: MachineConfig = defaultMachine()): string {
+/**
+ * Emit GRBL G-code for a job. Deterministic (golden-tested).
+ *
+ * `workspace` (optional) maps design points to the machine home corner via the
+ * coordinate harness (M2-T07). It is design-space (mm, so its unit conversion is
+ * a no-op) — only the origin/axis mapping applies; `machine.units` then scales
+ * the result for output. Omitting it (or a front-left workspace) is the identity,
+ * so existing golden fixtures are unaffected.
+ */
+export function emitGcode(
+  job: GcodeJob,
+  machine: MachineConfig = defaultMachine(),
+  workspace?: Workspace,
+): string {
   const scale = unitScale(machine.units);
-  const xy = (p: Vec2): string => `X${fmt(p.x * scale)} Y${fmt(p.y * scale)}`;
+  const xy = (p: Vec2): string => {
+    const m = workspace ? toMachineMm(p, workspace) : p;
+    return `X${fmt(m.x * scale)} Y${fmt(m.y * scale)}`;
+  };
   const lines: string[] = [
     '; Fluence G-code',
     machine.units === 'mm' ? 'G21' : 'G20',

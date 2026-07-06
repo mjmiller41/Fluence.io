@@ -37,7 +37,7 @@ import {
   serializeLibrary,
   starterLibrary,
 } from 'cam';
-import type { MachineConfig, Simulation } from 'fileformats';
+import type { MachineConfig, MachineOrigin, Simulation } from 'fileformats';
 
 export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon';
 
@@ -99,6 +99,8 @@ export interface EditorState {
   /** Per-layer cut settings (CAM). Missing layers fall back to defaults. */
   cutSettingsByLayer: Record<LayerId, CutSettings>;
   machine: MachineConfig;
+  /** Machine home corner for coordinate mapping (M2-T07). */
+  machineOrigin: MachineOrigin;
   gcode: GcodeResult | null;
   gcodeBusy: boolean;
   showGcodePreview: boolean;
@@ -128,6 +130,7 @@ export interface EditorState {
   addLayerAction(): void;
   updateLayer(id: LayerId, patch: Partial<Omit<Layer, 'id'>>): void;
 
+  setMachineOrigin(origin: MachineOrigin): void;
   /** Merge a cut-settings patch for one layer (creating defaults if absent). */
   setLayerCutSettings(id: LayerId, patch: Partial<CutSettings>): void;
   /** Load the material library from OPFS (seeding a starter set on first run). */
@@ -178,6 +181,7 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   cutSettingsByLayer: {},
   machine: DEFAULT_MACHINE,
+  machineOrigin: 'front-left',
   gcode: null,
   gcodeBusy: false,
   showGcodePreview: true,
@@ -263,6 +267,8 @@ export const useEditor = create<EditorState>((set, get) => ({
     history.execute(updateLayerCommand(doc, id, patch));
     set((s) => ({ version: s.version + 1 }));
   },
+
+  setMachineOrigin: (origin) => set((s) => ({ machineOrigin: origin, version: s.version + 1 })),
 
   setLayerCutSettings: (id, patch) => {
     set((s) => ({
@@ -367,12 +373,17 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   generateGcode: async () => {
     if (get().gcodeBusy) return;
-    const { doc, cutSettingsByLayer, machine, version } = get();
+    const { doc, cutSettingsByLayer, machine, machineOrigin, version } = get();
     set({ gcodeBusy: true });
     const { createCamClient } = await import('../cam/cam-client');
     const client = createCamClient();
     try {
-      const { gcode, simulation } = await client.api.generate(doc, cutSettingsByLayer, machine);
+      const { gcode, simulation } = await client.api.generate(
+        doc,
+        cutSettingsByLayer,
+        machine,
+        machineOrigin,
+      );
       set({ gcode: { text: gcode, sim: simulation, version }, showGcodePreview: true });
     } finally {
       client.terminate();

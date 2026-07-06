@@ -7,7 +7,10 @@ import {
   linspace,
   testGridShapes,
 } from 'cam';
+import type { MachineOrigin } from 'fileformats';
 import { useEditor } from './store';
+
+const ORIGINS: MachineOrigin[] = ['front-left', 'front-right', 'back-left', 'back-right', 'center'];
 
 const MODES: CutMode[] = ['line', 'fill', 'offset-fill', 'fill+line'];
 
@@ -24,6 +27,7 @@ export function CamPanel() {
   const showPreview = useEditor((s) => s.showGcodePreview);
   const activeLayerId = useEditor((s) => s.activeLayerId);
   const library = useEditor((s) => s.library);
+  const machineOrigin = useEditor((s) => s.machineOrigin);
   void version; // re-render when settings/document change
 
   const [presetName, setPresetName] = useState('');
@@ -204,6 +208,23 @@ export function CamPanel() {
       >
         Insert test grid (5×5)
       </button>
+
+      <div className="cam__header">Output</div>
+
+      <label className="cam__field">
+        <span>Machine origin</span>
+        <select
+          value={machineOrigin}
+          data-testid="machine-origin"
+          onChange={(e) => store.setMachineOrigin(e.target.value as MachineOrigin)}
+        >
+          {ORIGINS.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <button
         type="button"
