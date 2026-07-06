@@ -4,6 +4,8 @@ Offline-first, installable **PWA** that clones LightBurn (laser design + CAM + m
 
 > Not affiliated with LightBurn. Never uses the "LightBurn" trademark, logo, icons, or copied UI art.
 
+See **[PROJECT.md](./PROJECT.md)** for the project charter, and **[CLAUDE.md](./CLAUDE.md)** for how to work in the repo.
+
 ## Documentation
 Planning and architecture live in [`docs/`](./docs):
 
@@ -15,6 +17,7 @@ Planning and architecture live in [`docs/`](./docs):
 | [03-implementation-plan.md](./docs/03-implementation-plan.md) | Claude Code execution backlog (task cards) |
 | [04-deployment-plan.md](./docs/04-deployment-plan.md) | Shared Hostinger KVM 2 deployment |
 | [05-server-cohabitation-plan.md](./docs/05-server-cohabitation-plan.md) | Shared-VPS infra contract |
+| [06-decision-log.md](./docs/06-decision-log.md) | Decisions + rationale (project genesis) |
 | [CLAUDE.md](./docs/CLAUDE.md) | Project memory for Claude Code |
 
 ## Status

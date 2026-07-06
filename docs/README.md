@@ -11,7 +11,8 @@
 3. **[03-implementation-plan.md](./03-implementation-plan.md)** — Claude Code / Fable 5 execution backlog. Every feature decomposed into ~55 task cards (Goal · Deps · Refs · Files · Accept · Verify) across M0–M9 + commercialization.
 4. **[04-deployment-plan.md](./04-deployment-plan.md)** — Deploying Fluence on a shared Hostinger KVM 2 VPS (cohabited with LaserReady): compose stack, resource budget, proxy/DB/ports, offline invariant, CI/CD, backups, security, split triggers, infra task cards.
 5. **[05-server-cohabitation-plan.md](./05-server-cohabitation-plan.md)** — The shared-infrastructure contract for the two-app VPS (Fluence is the "Editor"). Read before touching anything shared.
-6. **[CLAUDE.md](../CLAUDE.md)** — Project memory auto-loaded by Claude Code: architecture invariants, locked stack, repo layout, verify commands, Definition of Done.
+6. **[06-decision-log.md](./06-decision-log.md)** — How the project came to be: decisions + rationale (from the originating conversation).
+7. **[CLAUDE.md](../CLAUDE.md)** — Project memory auto-loaded by Claude Code: architecture invariants, locked stack, repo layout, verify commands, Definition of Done.
 
 ## Where to start building
 `M0-T01` (monorepo scaffold), then de-risk early with `M0-T05` (Clipper2→WASM in a worker) and `M3-T02` (Web Serial character-counting on real GRBL hardware).

@@ -310,3 +310,41 @@ body {
   border-radius: 5px;
   cursor: pointer;
 }
+
+.cam__material-save,
+.cam__material-io {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+}
+
+.cam__material-save input {
+  flex: 1;
+  min-width: 0;
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem 0.35rem;
+  font: inherit;
+}
+
+.cam__material-save button,
+.cam__material-io button {
+  flex: 0 0 auto;
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.cam__material-io button {
+  flex: 1;
+}
+
+.cam__material-save button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

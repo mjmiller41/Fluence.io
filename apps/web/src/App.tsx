@@ -3,6 +3,7 @@ import { CamPanel } from './editor/CamPanel';
 import { EditorCanvas } from './editor/EditorCanvas';
 import { LayersPanel } from './editor/LayersPanel';
 import { Toolbar } from './editor/Toolbar';
+import { useEditor } from './editor/store';
 
 export function App() {
   const [online, setOnline] = useState<boolean>(() => navigator.onLine);
@@ -16,6 +17,11 @@ export function App() {
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
+  }, []);
+
+  // Load the persisted material library once (no-ops if OPFS is unavailable).
+  useEffect(() => {
+    void useEditor.getState().loadLibrary();
   }, []);
 
   return (

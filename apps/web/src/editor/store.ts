@@ -19,10 +19,35 @@ import {
   updateLayerCommand,
   updateShapeCommand,
 } from 'scene';
-import { type CutSettings, defaultCutSettings } from 'cam';
+import {
+  addPreset,
+  createPreset,
+  type CutSettings,
+  defaultCutSettings,
+  deserializeLibrary,
+  getPreset,
+  type MaterialLibrary,
+  removePreset,
+  serializeLibrary,
+  starterLibrary,
+} from 'cam';
 import type { MachineConfig, Simulation } from 'fileformats';
 
 export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon';
+
+/**
+ * Persist the material library to OPFS (lazy-loads the fileformats codec bundle).
+ * Best-effort: the in-memory library is the session source of truth, so a failed
+ * write (OPFS unavailable / tests / private mode) is swallowed rather than thrown.
+ */
+async function persistLibrary(lib: MaterialLibrary): Promise<void> {
+  try {
+    const { MaterialStore } = await import('fileformats');
+    await (await MaterialStore.open()).save(lib);
+  } catch {
+    /* best-effort */
+  }
+}
 
 /**
  * Default GRBL machine profile. Kept as a literal (rather than importing
@@ -61,6 +86,8 @@ export interface EditorState {
   gcode: GcodeResult | null;
   gcodeBusy: boolean;
   showGcodePreview: boolean;
+  /** Material preset library (M2-T04). Persisted to OPFS. */
+  library: MaterialLibrary;
 
   setTool(tool: Tool): void;
   select(ids: ShapeId[]): void;
@@ -83,6 +110,17 @@ export interface EditorState {
 
   /** Merge a cut-settings patch for one layer (creating defaults if absent). */
   setLayerCutSettings(id: LayerId, patch: Partial<CutSettings>): void;
+  /** Load the material library from OPFS (seeding a starter set on first run). */
+  loadLibrary(): Promise<void>;
+  /** Apply a preset's settings over a layer's current cut settings. */
+  applyMaterial(id: LayerId, presetId: string): void;
+  /** Save a layer's current settings as a new named preset (persisted). */
+  saveLayerAsPreset(id: LayerId, name: string): Promise<void>;
+  removeMaterial(presetId: string): Promise<void>;
+  /** Merge presets from an exported library JSON string (persisted). */
+  importLibrary(json: string): Promise<void>;
+  /** Download the library as JSON. */
+  exportLibrary(): void;
   /** Build CAM job -> G-code -> simulation in the CAM worker (off main thread). */
   generateGcode(): Promise<void>;
   /** Save the last generated G-code to disk (File System Access, download fallback). */
@@ -114,6 +152,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   gcode: null,
   gcodeBusy: false,
   showGcodePreview: true,
+  library: starterLibrary(),
 
   setTool: (tool) => set({ tool }),
   select: (ids) => set({ selection: ids }),
@@ -196,6 +235,61 @@ export const useEditor = create<EditorState>((set, get) => ({
       },
       version: s.version + 1,
     }));
+  },
+
+  loadLibrary: async () => {
+    try {
+      const { MaterialStore } = await import('fileformats');
+      let lib = await (await MaterialStore.open()).load();
+      if (lib.presets.length === 0) {
+        lib = starterLibrary();
+        await persistLibrary(lib);
+      }
+      set((s) => ({ library: lib, version: s.version + 1 }));
+    } catch {
+      // OPFS unavailable (tests / unsupported browser): keep the in-memory
+      // starter library seeded at store init.
+    }
+  },
+
+  applyMaterial: (id, presetId) => {
+    const preset = getPreset(get().library, presetId);
+    if (preset) get().setLayerCutSettings(id, preset.settings);
+  },
+
+  saveLayerAsPreset: async (id, name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const settings = get().cutSettingsByLayer[id] ?? defaultCutSettings();
+    const uuid = globalThis.crypto?.randomUUID?.();
+    const presetId = uuid ?? `preset-${get().library.presets.length + 1}-${settings.mode}`;
+    const library = addPreset(get().library, createPreset(presetId, trimmed, { ...settings }));
+    set((s) => ({ library, version: s.version + 1 }));
+    await persistLibrary(library);
+  },
+
+  removeMaterial: async (presetId) => {
+    const library = removePreset(get().library, presetId);
+    set((s) => ({ library, version: s.version + 1 }));
+    await persistLibrary(library);
+  },
+
+  importLibrary: async (json) => {
+    const incoming = deserializeLibrary(json);
+    let library = get().library;
+    for (const preset of incoming.presets) library = addPreset(library, preset);
+    set((s) => ({ library, version: s.version + 1 }));
+    await persistLibrary(library);
+  },
+
+  exportLibrary: () => {
+    const blob = new Blob([serializeLibrary(get().library)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fluence-materials.json';
+    a.click();
+    URL.revokeObjectURL(url);
   },
 
   generateGcode: async () => {

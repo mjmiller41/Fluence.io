@@ -1,3 +1,4 @@
+import { type ChangeEvent, useRef, useState } from 'react';
 import { type CutMode, defaultCutSettings } from 'cam';
 import { useEditor } from './store';
 
@@ -15,7 +16,11 @@ export function CamPanel() {
   const busy = useEditor((s) => s.gcodeBusy);
   const showPreview = useEditor((s) => s.showGcodePreview);
   const activeLayerId = useEditor((s) => s.activeLayerId);
+  const library = useEditor((s) => s.library);
   void version; // re-render when settings/document change
+
+  const [presetName, setPresetName] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const store = useEditor.getState();
   const settings = store.cutSettingsByLayer[activeLayerId] ?? defaultCutSettings();
@@ -24,6 +29,18 @@ export function CamPanel() {
 
   const patch = (p: Parameters<typeof store.setLayerCutSettings>[1]): void =>
     store.setLayerCutSettings(activeLayerId, p);
+
+  const onImportFile = (e: ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-importing the same file
+    if (!file) return;
+    void file.text().then((json) => store.importLibrary(json));
+  };
+
+  const onSavePreset = (): void => {
+    void store.saveLayerAsPreset(activeLayerId, presetName);
+    setPresetName('');
+  };
 
   return (
     <section className="cam" data-testid="cam-panel">
@@ -88,6 +105,60 @@ export function CamPanel() {
           />
         </label>
       )}
+
+      <div className="cam__header">Material library</div>
+
+      <label className="cam__field">
+        <span>Apply</span>
+        <select
+          value=""
+          data-testid="material-select"
+          onChange={(e) => {
+            if (e.target.value) store.applyMaterial(activeLayerId, e.target.value);
+          }}
+        >
+          <option value="">Choose preset…</option>
+          {library.presets.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className="cam__material-save">
+        <input
+          type="text"
+          placeholder="New preset name"
+          value={presetName}
+          data-testid="preset-name"
+          onChange={(e) => setPresetName(e.target.value)}
+        />
+        <button
+          type="button"
+          data-testid="save-preset"
+          disabled={presetName.trim() === ''}
+          onClick={onSavePreset}
+        >
+          Save layer
+        </button>
+      </div>
+
+      <div className="cam__material-io">
+        <button type="button" data-testid="import-library" onClick={() => fileRef.current?.click()}>
+          Import
+        </button>
+        <button type="button" data-testid="export-library" onClick={() => store.exportLibrary()}>
+          Export
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={onImportFile}
+        />
+      </div>
 
       <button
         type="button"

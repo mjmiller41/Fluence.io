@@ -5,6 +5,21 @@
  */
 export type { CutMode, FillGrouping, CutSettings } from './settings';
 export { defaultCutSettings } from './settings';
+export type { MaterialPreset, MaterialLibrary } from './material';
+export {
+  addPreset,
+  applyPreset,
+  createPreset,
+  deserializeLibrary,
+  emptyLibrary,
+  getPreset,
+  MATERIAL_LIBRARY_VERSION,
+  presetToSettings,
+  removePreset,
+  serializeLibrary,
+  starterLibrary,
+  updatePreset,
+} from './material';
 export type { Toolpath } from './toolpath';
 export {
   fillToolpaths,
