@@ -147,6 +147,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow-y: auto;
 }
 
 .layers {
@@ -220,11 +221,87 @@ body {
 }
 
 .cam {
-  flex: 1 1 auto;
-  overflow-y: auto;
+  flex: 0 0 auto;
   border-top: 1px solid var(--border);
   font-size: 0.85rem;
   padding-bottom: 0.5rem;
+}
+
+.art {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  padding-bottom: 0.5rem;
+}
+
+.art__save {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.art__save input {
+  flex: 1 1 100%;
+  min-width: 0;
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem 0.35rem;
+  font: inherit;
+}
+
+.art__save button {
+  flex: 1 1 auto;
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+.art__save button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.art__empty {
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.art__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.art__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+}
+
+.art__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.art__list li button {
+  width: 24px;
+  height: 24px;
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .cam__header {

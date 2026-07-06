@@ -43,8 +43,20 @@ export type {
   PathShape,
   GroupShape,
 } from './model/shape';
-export { isClosed, localPath, shapeBounds, shapeGeometry } from './model/shape';
+export { isClosed, localPath, reassignIds, shapeBounds, shapeGeometry } from './model/shape';
 export { nextId, resetIds } from './model/ids';
+export type { ArtItem, ArtLibrary } from './model/art';
+export {
+  addArtItem,
+  ART_LIBRARY_VERSION,
+  artCategories,
+  artItemsByCategory,
+  deserializeArtLibrary,
+  emptyArtLibrary,
+  getArtItem,
+  removeArtItem,
+  serializeArtLibrary,
+} from './model/art';
 export type { Document, Layer, Units } from './model/document';
 export {
   addLayer,

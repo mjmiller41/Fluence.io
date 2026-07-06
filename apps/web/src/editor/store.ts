@@ -1,17 +1,23 @@
 import { create } from 'zustand';
 import type { BooleanMode } from './boolean';
 import {
+  addArtItem,
   addLayerCommand,
   addShapeCommand,
+  type ArtLibrary,
   type Command,
   composite,
   createDocument,
   createLayer,
   type Document,
+  emptyArtLibrary,
   findShape,
+  getArtItem,
   History,
   type Layer,
   type LayerId,
+  reassignIds,
+  removeArtItem,
   removeShapeCommand,
   replaceShape,
   type Shape,
@@ -44,6 +50,16 @@ async function persistLibrary(lib: MaterialLibrary): Promise<void> {
   try {
     const { MaterialStore } = await import('fileformats');
     await (await MaterialStore.open()).save(lib);
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Persist the art library to OPFS (best-effort, same rationale as the material library). */
+async function persistArt(lib: ArtLibrary): Promise<void> {
+  try {
+    const { ArtStore } = await import('fileformats');
+    await (await ArtStore.open()).save(lib);
   } catch {
     /* best-effort */
   }
@@ -88,6 +104,8 @@ export interface EditorState {
   showGcodePreview: boolean;
   /** Material preset library (M2-T04). Persisted to OPFS. */
   library: MaterialLibrary;
+  /** Art library (M2-T06): reusable shape fragments. Persisted to OPFS. */
+  artLibrary: ArtLibrary;
 
   setTool(tool: Tool): void;
   select(ids: ShapeId[]): void;
@@ -123,6 +141,15 @@ export interface EditorState {
   importLibrary(json: string): Promise<void>;
   /** Download the library as JSON. */
   exportLibrary(): void;
+
+  /** Load the art library from OPFS. */
+  loadArt(): Promise<void>;
+  /** Store the current selection as a reusable art item (deep-copied, persisted). */
+  saveSelectionAsArt(name: string, category: string): Promise<void>;
+  /** Insert an art item's shapes into the document with fresh ids (undoable). */
+  insertArt(itemId: string): void;
+  removeArt(itemId: string): Promise<void>;
+
   /** Build CAM job -> G-code -> simulation in the CAM worker (off main thread). */
   generateGcode(): Promise<void>;
   /** Save the last generated G-code to disk (File System Access, download fallback). */
@@ -155,6 +182,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   gcodeBusy: false,
   showGcodePreview: true,
   library: starterLibrary(),
+  artLibrary: emptyArtLibrary(),
 
   setTool: (tool) => set({ tool }),
   select: (ids) => set({ selection: ids }),
@@ -299,6 +327,42 @@ export const useEditor = create<EditorState>((set, get) => ({
     a.download = 'fluence-materials.json';
     a.click();
     URL.revokeObjectURL(url);
+  },
+
+  loadArt: async () => {
+    try {
+      const { ArtStore } = await import('fileformats');
+      const lib = await (await ArtStore.open()).load();
+      set((s) => ({ artLibrary: lib, version: s.version + 1 }));
+    } catch {
+      // OPFS unavailable (tests / unsupported browser): keep the empty library.
+    }
+  },
+
+  saveSelectionAsArt: async (name, category) => {
+    const trimmedName = name.trim();
+    const shapes = get().selectedShapes();
+    if (!trimmedName || shapes.length === 0) return;
+    const id = globalThis.crypto?.randomUUID?.() ?? `art-${get().artLibrary.items.length + 1}`;
+    const artLibrary = addArtItem(get().artLibrary, {
+      id,
+      name: trimmedName,
+      category: category.trim() || 'Uncategorized',
+      shapes: reassignIds(shapes),
+    });
+    set((s) => ({ artLibrary, version: s.version + 1 }));
+    await persistArt(artLibrary);
+  },
+
+  insertArt: (itemId) => {
+    const item = getArtItem(get().artLibrary, itemId);
+    if (item) get().insertShapes(reassignIds(item.shapes));
+  },
+
+  removeArt: async (itemId) => {
+    const artLibrary = removeArtItem(get().artLibrary, itemId);
+    set((s) => ({ artLibrary, version: s.version + 1 }));
+    await persistArt(artLibrary);
   },
 
   generateGcode: async () => {

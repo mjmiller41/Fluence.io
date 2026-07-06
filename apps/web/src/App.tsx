@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArtPanel } from './editor/ArtPanel';
 import { CamPanel } from './editor/CamPanel';
 import { EditorCanvas } from './editor/EditorCanvas';
 import { LayersPanel } from './editor/LayersPanel';
@@ -19,9 +20,11 @@ export function App() {
     };
   }, []);
 
-  // Load the persisted material library once (no-ops if OPFS is unavailable).
+  // Load persisted libraries once (no-ops if OPFS is unavailable).
   useEffect(() => {
-    void useEditor.getState().loadLibrary();
+    const s = useEditor.getState();
+    void s.loadLibrary();
+    void s.loadArt();
   }, []);
 
   return (
@@ -42,6 +45,7 @@ export function App() {
         <div className="side-panels">
           <LayersPanel />
           <CamPanel />
+          <ArtPanel />
         </div>
       </div>
     </div>

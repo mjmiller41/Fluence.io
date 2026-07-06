@@ -9,6 +9,7 @@ import {
 } from '../geom/path';
 import type { Rect } from '../geom/rect';
 import { add, scale, sub, type Vec2 } from '../geom/vec';
+import { nextId } from './ids';
 
 export type ShapeId = string;
 export type LayerId = string;
@@ -72,6 +73,30 @@ export type Shape =
   | PolylineShape
   | PathShape
   | GroupShape;
+
+const ID_PREFIX: Record<Shape['kind'], string> = {
+  rect: 'rect',
+  ellipse: 'ell',
+  polygon: 'poly',
+  polyline: 'line',
+  path: 'path',
+  group: 'grp',
+};
+
+/**
+ * Deep-clone shapes with fresh ids (recursing into groups), so an inserted copy
+ * — duplicated selection, pasted art, a library item — never shares an id with
+ * the source or collides in the target document.
+ */
+export function reassignIds(shapes: Shape[]): Shape[] {
+  return shapes.map((s) => reidInPlace(structuredClone(s)));
+}
+
+function reidInPlace(shape: Shape): Shape {
+  shape.id = nextId(ID_PREFIX[shape.kind]);
+  if (shape.kind === 'group') shape.children = shape.children.map(reidInPlace);
+  return shape;
+}
 
 const KAPPA = 0.5522847498307936;
 

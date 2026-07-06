@@ -77,4 +77,26 @@ describe('editor app', () => {
     fireEvent.click(screen.getByTestId('undo'));
     expect(useEditor.getState().doc.shapes.length).toBe(before);
   });
+
+  it('saves the selection as art and re-inserts it with fresh ids', () => {
+    render(<App />);
+    // Add a rect — it becomes the current selection.
+    fireEvent.click(screen.getByTestId('add-rect'));
+    const selected = useEditor.getState().selection;
+    expect(selected).toHaveLength(1);
+
+    // Save it as an art item.
+    const items0 = useEditor.getState().artLibrary.items.length;
+    fireEvent.change(screen.getByTestId('art-name'), { target: { value: 'My Star' } });
+    fireEvent.click(screen.getByTestId('save-art'));
+    expect(useEditor.getState().artLibrary.items.length).toBe(items0 + 1);
+
+    // Insert it back — a new shape with a different id from the original.
+    const shapesBefore = useEditor.getState().doc.shapes.length;
+    fireEvent.click(screen.getAllByTestId('insert-art')[0]);
+    const doc = useEditor.getState().doc;
+    expect(doc.shapes.length).toBe(shapesBefore + 1);
+    const inserted = useEditor.getState().selection[0];
+    expect(inserted).not.toBe(selected[0]);
+  });
 });
