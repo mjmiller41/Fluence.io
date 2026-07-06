@@ -1,4 +1,4 @@
-/** A 2D point as an [x, y] tuple (millimetres in Fluence's world space). */
+/** A 2D point as an [x, y] tuple (millimetres in LaserKerf's world space). */
 export type Point = readonly [x: number, y: number];
 /** A polygon ring (implicitly closed; no duplicated final vertex). */
 export type Ring = readonly Point[];

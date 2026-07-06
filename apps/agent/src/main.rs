@@ -1,4 +1,4 @@
-//! Fluence Agent — native companion bridge (M0 stub).
+//! LaserKerf Agent — native companion bridge (M0 stub).
 //!
 //! The real Agent (localhost WSS listener, origin-lock, token pairing, signed
 //! auto-updater, Ruida/galvo transports) lands in milestone **M4** — see
@@ -16,7 +16,7 @@ pub const LOOPBACK: &str = "127.0.0.1";
 
 /// Human-readable startup banner. Kept in a pure function so it is unit-testable.
 fn banner() -> String {
-    format!("fluence-agent {AGENT_VERSION} (M0 stub) — loopback {LOOPBACK}")
+    format!("laserkerf-agent {AGENT_VERSION} (M0 stub) — loopback {LOOPBACK}")
 }
 
 fn main() {

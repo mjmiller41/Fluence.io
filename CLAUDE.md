@@ -1,9 +1,12 @@
-# CLAUDE.md — Fluence
+# CLAUDE.md — LaserKerf
+
+## First Read
+@../CLAUDE.md
 
 > Auto-loaded by Claude Code. Keep this short, factual, and current — it is the source of truth for HOW to work in this repo. The executable task backlog is `docs/03-implementation-plan.md`; the "why" is `docs/01-feasibility-study.md` + `docs/02-development-plan.md`.
 
 ## Project
-- **Name:** Fluence (fluence.io). **Repo:** `git@github.com:mjmiller41/Fluence.io.git` (branch `main`).
+- **Name:** LaserKerf (laserkerf.io). **Repo:** `git@github.com:mjmiller41/LaserKerf.io.git` (branch `main`).
 - **What:** offline-first, installable **PWA** cloning LightBurn (laser design + CAM + machine control), plus a signed native companion **Agent** for hardware the browser can't reach (Ruida DSP, galvo/fiber). Commercial, GRBL-first, phased to parity.
 - **Legal:** not affiliated with LightBurn. Never use the "LightBurn" trademark, logo, icons, or copied UI art.
 - **Status:** in implementation. M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress; M3 (GRBL control → MVP) next. See `docs/03-implementation-plan.md` for the live checkbox state.
@@ -12,8 +15,6 @@
 - `docs/01-feasibility-study.md` — constraints, market, legal.
 - `docs/02-development-plan.md` — architecture, milestones M0–M9, parity checklist, risk register.
 - `docs/03-implementation-plan.md` — the task backlog. Cards: *Goal · Deps · Refs · Files · Accept · Verify*. One card per session; `/clear` between; mark `[x]` + commit with the task ID.
-- `docs/04-deployment-plan.md` — shared Hostinger KVM 2 deployment + infra cards `INF-T01..T06`.
-- `docs/05-server-cohabitation-plan.md` — the shared-VPS contract (Fluence = the "Editor" tenant).
 
 ## Non-negotiable architecture invariants
 1. **Two artifacts:** `apps/web` (PWA) and `apps/agent` (native Rust bridge). The web app MUST work with the Agent absent — only Ruida/galvo require it. GRBL never does.
@@ -40,11 +41,11 @@ Electron for the main app · CGAL/WASM (no FP rounding-mode control) · WebUSB a
 ```
 apps/web            PWA
 apps/agent          Rust native companion + updater
-apps/deploy/fluence Docker Compose stack for the shared VPS (see docs/04)
+apps/deploy/laserkerf Docker Compose stack (see /DEPLOY.md)
 packages/geometry-wasm   Clipper2/offset/dither/planner → WASM
 packages/device-core     Device interface + transports
 packages/protocols       grbl, ruida, galvo/ezcad codecs (TS + Rust)
-packages/fileformats     .fluence, .lbrn import, svg/dxf/ai/pdf import, gcode/rd export
+packages/fileformats     .laserkerf, .lbrn import, svg/dxf/ai/pdf import, gcode/rd export
 packages/ui-kit          shared components, canvas widgets
 packages/cv              OpenCV.js camera calibration wrappers
 tools/                   build, codegen, protocol test rigs
@@ -70,18 +71,10 @@ docs/                    planning docs (source of truth for scope)
 - If machine output changed, golden fixtures updated with a note in the commit body.
 
 ## Working style for Claude Code
-- Do ONE task card per session; `/clear` between cards. Reference the task ID (e.g. `M1-T03`, `INF-T01`).
+- Do ONE task card per session; `/clear` between cards. Reference the task ID (e.g. `M1-T03`).
 - Read the card's "Refs" in the source docs before coding.
 - Small PRs mapped 1:1 to task cards. Update the card's checkbox in `docs/03-implementation-plan.md` when done.
 - If a task is bigger than one session, split it and note the split in the plan.
 
-## Deployment (shared VPS — read `docs/04-deployment-plan.md` + `docs/05-server-cohabitation-plan.md`)
-Fluence initially deploys to a **shared Hostinger KVM 2** (2 vCPU · 8 GB) cohabited with **LaserReady**. Fluence is the "Editor" tenant. Hard rules on that box:
-- **Stay in your lane.** Only touch `apps/deploy/fluence/`. Never modify LaserReady's containers/DB or the shared Caddy/Postgres without coordinating.
-- **No published host ports.** Shared Caddy is the only public entry; Fluence internal ports live in **8000–8099**.
-- **Explicit `cpus` + `mem_limit` on every service.** Fluence is a light tenant (static PWA + small licensing/accounts API); heavy compute is client-side.
-- **Shared Postgres, separate `fluence` DB only.** No cross-DB access.
-- **Secrets in Fluence's git-ignored `.env`** (esp. the license signing key). Never commit/share.
-- **Design for extraction.** Own repo + own compose + own subdomains → liftable to a dedicated box in an afternoon.
-- Deploy must keep `pnpm e2e:offline` green — the offline invariant survives deployment.
-Infra tasks: `INF-T01..T06` in `docs/04-deployment-plan.md §9`.
+## Deployment
+See `DEPLOY.md` at the repo root — the single source of truth for deploying LaserKerf (via Hostinger MCP or SSH), including the shared-proxy coordination rules. Do not duplicate deploy steps elsewhere.

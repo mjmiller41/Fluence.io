@@ -1,13 +1,13 @@
 [package]
-name = "fluence-agent"
+name = "laserkerf-agent"
 version = "0.0.0"
 edition = "2021"
-description = "Fluence native companion Agent (M0 stub). Localhost WSS bridge to hardware the browser can't reach (Ruida DSP, galvo/fiber)."
+description = "LaserKerf native companion Agent (M0 stub). Localhost WSS bridge to hardware the browser can't reach (Ruida DSP, galvo/fiber)."
 license = "UNLICENSED"
 publish = false
 
 [[bin]]
-name = "fluence-agent"
+name = "laserkerf-agent"
 path = "src/main.rs"
 
 [dependencies]

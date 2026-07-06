@@ -1,6 +1,6 @@
 # Development Plan — Browser-Based LightBurn Clone (Near-Full Feature Parity)
 
-**Project:** Fluence (fluence.io) — do not use the "LightBurn" trademark, logo, icons, or copied UI art
+**Project:** LaserKerf (laserkerf.io) — do not use the "LightBurn" trademark, logo, icons, or copied UI art
 **Target:** Offline-first installable PWA + signed native companion agent, matching LightBurn as closely as practical.
 **Model:** Commercial. Perpetual license + annual updates, or subscription.
 **Companion doc:** `browser-lightburn-clone-feasibility.md` (the go/no-go analysis this plan builds on).
@@ -64,7 +64,7 @@ A realistic honest framing up front: LightBurn is ~8–9 years of work by a smal
 - **All heavy compute runs in Web Workers**, never the main thread. The geometry core is a single WASM module with a typed message API. Rendering uses OffscreenCanvas in its own worker.
 - **The App must function with the Agent absent.** Agent is detected via a localhost handshake; if missing, DSP/galvo features show an "install companion" flow. GRBL never needs it.
 - **Offline is a first-class invariant**, tested in CI (see §8). No feature may hard-depend on a network call.
-- **The file format is open and versioned** from day one (`.fluence`, a zipped JSON + assets). Also import LightBurn `.lbrn`/`.lbrn2` (XML) and export G-code / `.rd` (Ruida) / galvo job files.
+- **The file format is open and versioned** from day one (`.laserkerf`, a zipped JSON + assets). Also import LightBurn `.lbrn`/`.lbrn2` (XML) and export G-code / `.rd` (Ruida) / galvo job files.
 
 ### 1.3 Monorepo layout
 
@@ -76,7 +76,7 @@ A realistic honest framing up front: LightBurn is ~8–9 years of work by a smal
   /geometry-wasm  C++/Rust → WASM (Clipper2, offset, dithering, planner)
   /device-core    TS device abstraction + transports (webserial, agent-ws)
   /protocols      Ruida codec, GRBL codec, galvo/EZCAD codec (shared TS + Rust)
-  /fileformats    .fluence, .lbrn import, svg/dxf/ai/pdf import, gcode/rd export
+  /fileformats    .laserkerf, .lbrn import, svg/dxf/ai/pdf import, gcode/rd export
   /ui-kit         shared components, canvas widgets
   /cv             OpenCV.js wrappers for camera calibration
 /tools            build, codegen, protocol test rigs
@@ -149,7 +149,7 @@ Durations assume the §3 team; they overlap where dependencies allow.
 
 ### M0 — Foundations (weeks 1–6)
 Monorepo, CI, service worker offline shell, OPFS/IndexedDB persistence, the `Device` abstraction + fake device, WASM build pipeline, golden-output and offline test harnesses.
-**Exit:** empty app installs as a PWA, runs offline, saves/loads a `.fluence`, fake device streams to a simulator, CI green incl. offline test.
+**Exit:** empty app installs as a PWA, runs offline, saves/loads a `.laserkerf`, fake device streams to a simulator, CI green incl. offline test.
 
 ### M1 — Design & vector engine (weeks 5–16, overlaps M0)
 Canvas editor: select/move/scale/rotate/align/distribute; primitives (rect, ellipse, polygon, line, bezier); **node editing**; **boolean ops + weld** (Clipper2); **offset/kerf**; grouping; text + system fonts + **single-line/SHX**; layers panel; undo/redo; snapping/guides; SVG/DXF/AI/PDF import; PNG/JPG import.
@@ -307,7 +307,7 @@ Legend: ✅ straightforward · 🟡 heavy but solved-path · 🔴 hard/risky.
 4. Spike Web Serial character-counting against one real GRBL board to de-risk M3 early.
 5. Acquire HIL hardware (GRBL board now; Ruida + galvo boards ordered for M4/M7) and stand up the MeerK40t Ruida emulator.
 6. Kick off IP counsel engagement and a USPTO patent clearance search.
-7. Lock the `.fluence` format v1 and the `.lbrn` import mapping.
+7. Lock the `.laserkerf` format v1 and the `.lbrn` import mapping.
 
 ---
 

@@ -58,7 +58,7 @@ export function emitGcode(
     return `X${fmt(m.x * scale)} Y${fmt(m.y * scale)}`;
   };
   const lines: string[] = [
-    '; Fluence G-code',
+    '; LaserKerf G-code',
     machine.units === 'mm' ? 'G21' : 'G20',
     'G90',
     'M5',

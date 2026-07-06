@@ -12,7 +12,7 @@ export interface ProjectMeta {
   schemaVersion: number;
 }
 
-const DB_NAME = 'fluence';
+const DB_NAME = 'laserkerf';
 const STORE = 'projects';
 const UPDATED_INDEX = 'updatedAt';
 

@@ -8,10 +8,10 @@ const store = (): OpfsBlobStore =>
 describe('OpfsBlobStore', () => {
   it('writes and reads back a blob', async () => {
     const s = store();
-    const data = new TextEncoder().encode('hello fluence');
+    const data = new TextEncoder().encode('hello laserkerf');
     await s.writeBlob('a.bin', data);
     expect(await s.has('a.bin')).toBe(true);
-    expect(new TextDecoder().decode(await s.readBlob('a.bin'))).toBe('hello fluence');
+    expect(new TextDecoder().decode(await s.readBlob('a.bin'))).toBe('hello laserkerf');
     expect(await s.size('a.bin')).toBe(data.byteLength);
   });
 

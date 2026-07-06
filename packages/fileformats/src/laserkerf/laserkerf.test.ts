@@ -9,7 +9,7 @@ import {
   resetIds,
   shapeBounds,
 } from 'scene';
-import { deserializeFluence, FLUENCE_FORMAT_VERSION, serializeFluence } from './fluence';
+import { deserializeLaserKerf, LASERKERF_FORMAT_VERSION, serializeLaserKerf } from './laserkerf';
 
 function sampleDoc() {
   resetIds();
@@ -21,14 +21,14 @@ function sampleDoc() {
   return doc;
 }
 
-describe('.fluence format', () => {
+describe('.laserkerf format', () => {
   it('round-trips a project losslessly with a version field', () => {
     const doc = sampleDoc();
-    const bytes = serializeFluence(doc);
+    const bytes = serializeLaserKerf(doc);
     expect(bytes.byteLength).toBeGreaterThan(0);
 
-    const loaded = deserializeFluence(bytes);
-    expect(loaded.formatVersion).toBe(FLUENCE_FORMAT_VERSION);
+    const loaded = deserializeLaserKerf(bytes);
+    expect(loaded.formatVersion).toBe(LASERKERF_FORMAT_VERSION);
     expect(loaded.document).toEqual(doc);
 
     // geometry survives exactly
@@ -37,15 +37,15 @@ describe('.fluence format', () => {
     expect(loaded.document.layers).toHaveLength(2);
   });
 
-  it('rejects non-fluence data', () => {
-    expect(() => deserializeFluence(new Uint8Array([1, 2, 3, 4]))).toThrow();
+  it('rejects non-laserkerf data', () => {
+    expect(() => deserializeLaserKerf(new Uint8Array([1, 2, 3, 4]))).toThrow();
   });
 
   it('rejects a future format version', () => {
     const doc = sampleDoc();
     // hand-craft a file claiming a newer version
-    const future = serializeFluence(doc);
-    const parsed = deserializeFluence(future);
-    expect(parsed.formatVersion).toBe(FLUENCE_FORMAT_VERSION);
+    const future = serializeLaserKerf(doc);
+    const parsed = deserializeLaserKerf(future);
+    expect(parsed.formatVersion).toBe(LASERKERF_FORMAT_VERSION);
   });
 });

@@ -30,7 +30,7 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="app-bar">
-        <h1 data-testid="app-title">Fluence</h1>
+        <h1 data-testid="app-title">LaserKerf</h1>
         <span className="app-bar__milestone">M2 · CAM &amp; G-code</span>
         <span
           className={`badge ${online ? 'badge--online' : 'badge--offline'}`}

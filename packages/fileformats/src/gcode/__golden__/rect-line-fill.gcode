@@ -1,4 +1,4 @@
-; Fluence G-code
+; LaserKerf G-code
 G21
 G90
 M5

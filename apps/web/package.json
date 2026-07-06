@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Fluence PWA — offline-first installable app shell (M0); design/CAM/device UI lands in M1+.",
+  "description": "LaserKerf PWA — offline-first installable app shell (M0); design/CAM/device UI lands in M1+.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

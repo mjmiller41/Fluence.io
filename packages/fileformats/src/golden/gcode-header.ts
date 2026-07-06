@@ -13,7 +13,7 @@ export function emitGcodeHeader(s: JobSettings): string {
   const unitsLine = s.units === 'mm' ? 'G21 ; millimetres' : 'G20 ; inches';
   return (
     [
-      '; Fluence M0 golden sample -- GRBL header',
+      '; LaserKerf M0 golden sample -- GRBL header',
       unitsLine,
       'G90 ; absolute positioning',
       'M5 ; laser off',

@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "fluence-agent"
+name = "laserkerf-agent"
 version = "0.0.0"

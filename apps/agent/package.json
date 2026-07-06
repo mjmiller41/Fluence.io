@@ -2,7 +2,7 @@
   "name": "agent",
   "version": "0.0.0",
   "private": true,
-  "description": "Fluence native companion Agent (Rust). Wraps cargo so Turborepo/pnpm can orchestrate it alongside the JS workspace.",
+  "description": "LaserKerf native companion Agent (Rust). Wraps cargo so Turborepo/pnpm can orchestrate it alongside the JS workspace.",
   "scripts": {
     "build": "cargo build",
     "test": "cargo test",

@@ -9,7 +9,7 @@ test.describe('offline invariant', () => {
     context,
   }) => {
     await page.goto('/');
-    await expect(page.getByTestId('app-title')).toHaveText('Fluence');
+    await expect(page.getByTestId('app-title')).toHaveText('LaserKerf');
 
     // Wait for the service worker to activate, control the page, and precache.
     await page.evaluate(async () => {
@@ -34,7 +34,7 @@ test.describe('offline invariant', () => {
     await page.reload();
 
     await expect(page.getByTestId('net-status')).toHaveText('offline');
-    await expect(page.getByTestId('app-title')).toHaveText('Fluence');
+    await expect(page.getByTestId('app-title')).toHaveText('LaserKerf');
 
     // Editing works offline: the scene model + render worker run from cache.
     await expect(page.getByTestId('shape-count')).toHaveText('0');

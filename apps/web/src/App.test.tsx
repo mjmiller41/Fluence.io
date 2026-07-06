@@ -8,7 +8,7 @@ afterEach(() => cleanup());
 describe('editor app', () => {
   it('renders the toolbar/canvas and adds a shape via the store', () => {
     render(<App />);
-    expect(screen.getByTestId('app-title').textContent).toMatch(/Fluence/i);
+    expect(screen.getByTestId('app-title').textContent).toMatch(/LaserKerf/i);
     expect(screen.getByTestId('toolbar')).toBeTruthy();
     expect(screen.getByTestId('tool-select')).toBeTruthy();
     expect(screen.getByTestId('editor-canvas')).toBeTruthy();
