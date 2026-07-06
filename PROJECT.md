@@ -1,18 +1,18 @@
-# Fluence.io — Project Charter
+# LaserKerf.io — Project Charter
 
 **One line:** An offline-first, installable web app (PWA) that clones LightBurn — laser design + CAM + machine control — with a signed native companion Agent for the hardware a browser can't reach.
 
 **Status:** In implementation. M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress. Next up: finish remaining M1/M2 cards, then M3 (GRBL real-time control → MVP ship). See `docs/03-implementation-plan.md` for the live checkbox state.
-**Repo:** `git@github.com:mjmiller41/Fluence.io.git` (`main`).
+**Repo:** `git@github.com:mjmiller41/LaserKerf.io.git` (`main`).
 **Owner:** Michael J. Miller. Commercial product. Not affiliated with LightBurn; uses none of its trademark, logo, icons, or UI art.
 
 ---
 
 ## Why this exists (the opportunity)
-There is a real, unoccupied seam in the laser-software market: **LightBurn** is paid, desktop-only, and dropped Linux; **Glowforge**'s app is web-based but cloud-locked and unusable offline. Nobody ships a polished, cross-platform tool that is both **web-delivered and fully offline**. `MeerK40t` proves the hardware reverse-engineering is legally and technically traveled, but it's desktop Python — the web niche is open. Fluence occupies that seam.
+There is a real, unoccupied seam in the laser-software market: **LightBurn** is paid, desktop-only, and dropped Linux; **Glowforge**'s app is web-based but cloud-locked and unusable offline. Nobody ships a polished, cross-platform tool that is both **web-delivered and fully offline**. `MeerK40t` proves the hardware reverse-engineering is legally and technically traveled, but it's desktop Python — the web niche is open. LaserKerf occupies that seam.
 
 ## The one constraint that shapes the whole product
-Browsers can talk to serial and USB (Chromium's Web Serial / WebUSB) but **cannot open raw UDP sockets**. GRBL (USB serial) is fully reachable from the browser; **Ruida DSP over Ethernet/UDP and galvo/fiber over vendor USB are not**. Therefore Fluence is **two artifacts, by design**:
+Browsers can talk to serial and USB (Chromium's Web Serial / WebUSB) but **cannot open raw UDP sockets**. GRBL (USB serial) is fully reachable from the browser; **Ruida DSP over Ethernet/UDP and galvo/fiber over vendor USB are not**. Therefore LaserKerf is **two artifacts, by design**:
 
 - **The App** — a Chromium PWA (React/TS + WASM geometry) that runs fully offline and does all design, CAM, and GRBL control.
 - **The Agent** — a small signed, auto-updating native binary exposing a `wss://localhost` bridge, used only for Ruida and galvo. This mirrors LightBurn's own "Bridge."
@@ -40,7 +40,7 @@ Both are offset by the thing neither competitor offers: genuinely cross-platform
 React/TS + Zustand · WebGL2/WebGPU on OffscreenCanvas · Clipper2/VTracer/custom-dither → **WASM in Web Workers** · OPFS + IndexedDB · Workbox service worker (offline) · Web Serial (GRBL) · Rust Agent (tokio/tungstenite/rusb) for Ruida UDP + galvo USB · pnpm + Turborepo monorepo.
 
 ## Deployment
-Initial: a **shared Hostinger KVM 2** (2 vCPU · 8 GB) cohabited with **LaserReady**; Fluence is the light "Editor" tenant (heavy compute is client-side). See `docs/04` + the shared-VPS contract `docs/05`.
+See `DEPLOY.md` at the repo root — the single source of truth.
 
 ## Project structure
 ```
@@ -52,8 +52,6 @@ docs/
   01-feasibility-study.md      Go/no-go analysis, constraints, market/legal
   02-development-plan.md        Architecture, milestones M0–M9, parity checklist
   03-implementation-plan.md     Executable task backlog (Claude Code task cards)
-  04-deployment-plan.md         Shared KVM 2 deployment + INF task cards
-  05-server-cohabitation-plan.md  Shared-VPS infra contract
   06-decision-log.md            How we got here — decisions + rationale (this chat)
 ```
 

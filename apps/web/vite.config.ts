@@ -23,8 +23,8 @@ export default defineConfig({
       },
       includeAssets: ['icons/favicon.svg', 'icons/icon-192.png'],
       manifest: {
-        name: 'Fluence',
-        short_name: 'Fluence',
+        name: 'LaserKerf',
+        short_name: 'LaserKerf',
         description: 'Offline-first laser design, CAM, and machine control.',
         theme_color: '#0b0f14',
         background_color: '#0b0f14',

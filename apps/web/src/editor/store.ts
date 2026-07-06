@@ -330,7 +330,7 @@ export const useEditor = create<EditorState>((set, get) => ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'fluence-materials.json';
+    a.download = 'laserkerf-materials.json';
     a.click();
     URL.revokeObjectURL(url);
   },
@@ -404,7 +404,7 @@ export const useEditor = create<EditorState>((set, get) => ({
     ).showSaveFilePicker;
     if (typeof picker === 'function') {
       const handle = await picker({
-        suggestedName: 'fluence.gcode',
+        suggestedName: 'laserkerf.gcode',
         types: [{ description: 'G-code', accept: { 'text/plain': ['.gcode', '.nc'] } }],
       });
       const writable = await handle.createWritable();
@@ -414,7 +414,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'fluence.gcode';
+      a.download = 'laserkerf.gcode';
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -434,17 +434,17 @@ export const useEditor = create<EditorState>((set, get) => ({
     })),
 
   saveProject: async () => {
-    const { ProjectStore, serializeFluence } = await import('fileformats');
+    const { ProjectStore, serializeLaserKerf } = await import('fileformats');
     const store = await ProjectStore.open();
-    await store.save('current', 'Untitled', serializeFluence(get().doc));
+    await store.save('current', 'Untitled', serializeLaserKerf(get().doc));
   },
 
   openProject: async () => {
-    const { ProjectStore, deserializeFluence } = await import('fileformats');
+    const { ProjectStore, deserializeLaserKerf } = await import('fileformats');
     const store = await ProjectStore.open();
     const loaded = await store.load('current');
     if (!loaded) return;
-    get().loadDocument(deserializeFluence(loaded.bytes).document);
+    get().loadDocument(deserializeLaserKerf(loaded.bytes).document);
   },
 
   undo: () => {

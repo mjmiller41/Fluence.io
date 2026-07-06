@@ -6,7 +6,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { assertGolden } from './golden';
 
-const dir = mkdtempSync(join(tmpdir(), 'fluence-golden-'));
+const dir = mkdtempSync(join(tmpdir(), 'laserkerf-golden-'));
 
 describe('assertGolden', () => {
   afterAll(() => {

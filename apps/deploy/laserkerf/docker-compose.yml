@@ -1,0 +1,34 @@
+# LaserKerf web stack — the "Editor" tenant on the shared Hostinger KVM 2.
+#
+# House rules (see /DEPLOY.md — shared-proxy coordination contract): explicit cpus/mem_limit
+# on every service, publish nothing to the host, reach the world only via the shared Caddy
+# proxy, stay inside the editor internal port range 8000-8099.
+#
+# Phase A (now): static PWA only. The laserkerf-api + Postgres services (licensing /
+# accounts / downloads) are Phase B — see /DEPLOY.md "Phase B". They are intentionally
+# NOT in this file yet.
+#
+# Run from this directory:  docker compose --env-file .env up -d --build
+
+services:
+  laserkerf-web:
+    build:
+      context: ../../..
+      dockerfile: apps/deploy/laserkerf/Dockerfile
+    image: laserkerf-web:${TAG:-local}
+    container_name: laserkerf-web
+    restart: unless-stopped
+    # Static PWA — a thin slice of the box. Heavy compute is client-side by design.
+    cpus: "0.25"
+    mem_limit: 256m
+    networks:
+      - shared_proxy
+    # No `ports:` on purpose — the shared Caddy reaches us as laserkerf-web:8000.
+
+networks:
+  # The one shared external network, literally named "proxy" (created once on the box:
+  # docker network create proxy). We reference it locally as shared_proxy but bind to
+  # the real name so we never create a second network.
+  shared_proxy:
+    external: true
+    name: proxy

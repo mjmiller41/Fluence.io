@@ -1,0 +1,27 @@
+# ---- LaserKerf — merge into the SHARED Caddy proxy config (coordinate before touching) ----
+# The shared proxy owns :80/:443 and TLS for every app on the box. This snippet only adds
+# hostname routing; laserkerf-web never faces the internet directly. It sits on the shared
+# "proxy" network alongside laserready-web and the shared-caddy container.
+#
+# Phase A: marketing site + installable PWA only.
+
+laserkerf.io, www.laserkerf.io, app.laserkerf.io {
+	encode gzip
+	reverse_proxy laserkerf-web:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
+
+# Phase B — uncomment once laserkerf-api ships (licensing/accounts) and /downloads is served:
+# api.laserkerf.io {
+# 	encode gzip
+# 	reverse_proxy laserkerf-api:8001
+# }
+# downloads.laserkerf.io {
+# 	encode gzip
+# 	reverse_proxy laserkerf-web:8000   # /downloads + signed /update manifest
+# }

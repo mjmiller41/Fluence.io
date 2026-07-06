@@ -3,7 +3,7 @@ import { MetaStore, type ProjectMeta } from './idb';
 
 /**
  * Facade tying the two storage tiers together: project blobs in OPFS, metadata
- * in IndexedDB. This is the seam the `.fluence` format (M1-T11) will serialize
+ * in IndexedDB. This is the seam the `.laserkerf` format (M1-T11) will serialize
  * into; for M0 it round-trips opaque bytes so the storage layer can be verified
  * end to end.
  */

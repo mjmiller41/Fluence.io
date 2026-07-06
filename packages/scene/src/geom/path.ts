@@ -3,7 +3,7 @@ import { boundsOfPoints, unionRect, type Rect } from './rect';
 import type { Vec2 } from './vec';
 
 /**
- * A path segment. Fluence keeps geometry as lines + cubic beziers (quadratics are
+ * A path segment. LaserKerf keeps geometry as lines + cubic beziers (quadratics are
  * elevated to cubics on import). Each segment's `to` is its end point; the start
  * comes from the previous segment (or the subpath `start`).
  */
