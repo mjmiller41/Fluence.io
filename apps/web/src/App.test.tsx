@@ -65,4 +65,16 @@ describe('editor app', () => {
     expect(useEditor.getState().library.presets.length).toBe(beforeCount + 1);
     expect(useEditor.getState().library.presets.some((p) => p.name === 'My Preset')).toBe(true);
   });
+
+  it('inserts a material test grid as one undoable step', () => {
+    render(<App />);
+    const before = useEditor.getState().doc.shapes.length;
+    fireEvent.click(screen.getByTestId('insert-testgrid'));
+    // 5x5 = 25 cell squares (plus axis labels) added at once.
+    const after = useEditor.getState().doc.shapes.length;
+    expect(after).toBeGreaterThanOrEqual(before + 25);
+
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().doc.shapes.length).toBe(before);
+  });
 });

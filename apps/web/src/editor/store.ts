@@ -95,6 +95,8 @@ export interface EditorState {
   setActiveLayer(id: LayerId): void;
 
   addShapeAction(shape: Shape): void;
+  /** Add many shapes as one undoable step (e.g. an imported or generated set). */
+  insertShapes(shapes: Shape[]): void;
   /** Live mutation during a drag (no history entry). */
   previewUpdate(shape: Shape): void;
   /** Commit a completed drag as one undo step given the pre-drag shapes. */
@@ -163,6 +165,13 @@ export const useEditor = create<EditorState>((set, get) => ({
     const { doc, history } = get();
     history.execute(addShapeCommand(doc, shape));
     set((s) => ({ selection: [shape.id], version: s.version + 1 }));
+  },
+
+  insertShapes: (shapes) => {
+    if (shapes.length === 0) return;
+    const { doc, history } = get();
+    history.execute(composite('Insert', shapes.map((sh) => addShapeCommand(doc, sh))));
+    set((s) => ({ selection: shapes.map((sh) => sh.id), version: s.version + 1 }));
   },
 
   previewUpdate: (shape) => {

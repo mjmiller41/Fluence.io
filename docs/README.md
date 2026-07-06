@@ -14,8 +14,8 @@
 6. **[06-decision-log.md](./06-decision-log.md)** — How the project came to be: decisions + rationale (from the originating conversation).
 7. **[CLAUDE.md](../CLAUDE.md)** — Project memory auto-loaded by Claude Code: architecture invariants, locked stack, repo layout, verify commands, Definition of Done.
 
-## Where to start building
-`M0-T01` (monorepo scaffold), then de-risk early with `M0-T05` (Clipper2→WASM in a worker) and `M3-T02` (Web Serial character-counting on real GRBL hardware).
+## Status & where to build next
+In implementation: M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress; M3 (GRBL control → MVP) next. The `M0-T05` Clipper2→WASM-in-a-worker de-risk is done; `M3-T02` (Web Serial character-counting on real GRBL hardware) remains the biggest unproven risk to de-risk early. See [03-implementation-plan.md](./03-implementation-plan.md) for the live checkbox state.
 
 ## The one permanent constraint
 Fluence targets **Chromium desktop** (Chrome/Edge). No Safari/iOS; Firefox is not relied upon. This is structural (Web Serial / WebUSB are Chromium-only) and is offset by the product's edge: genuinely cross-platform + fully offline, which neither LightBurn (desktop-only, dropped Linux) nor Glowforge (cloud-locked) offers.

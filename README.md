@@ -21,4 +21,4 @@ Planning and architecture live in [`docs/`](./docs):
 | [CLAUDE.md](./docs/CLAUDE.md) | Project memory for Claude Code |
 
 ## Status
-Pre-implementation. Start at `M0-T01` in the implementation plan.
+In implementation. M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress; M3 (GRBL control → MVP) next. See [`docs/03-implementation-plan.md`](./docs/03-implementation-plan.md) for the live task-by-task state.
