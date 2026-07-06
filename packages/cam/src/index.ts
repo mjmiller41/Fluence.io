@@ -28,5 +28,20 @@ export {
   offsetFillToolpaths,
   serializeToolpaths,
 } from './toolpath';
+export type {
+  CamOperation,
+  NumericCutKey,
+  TestCell,
+  TestGrid,
+  TestGridSpec,
+  TestLabel,
+} from './testgrid';
+export {
+  generateTestGrid,
+  linspace,
+  strokePolylines,
+  testGridOperations,
+  testGridShapes,
+} from './testgrid';
 export type { OrderOptions } from './order';
 export { optimizeOrder, totalTravel } from './order';

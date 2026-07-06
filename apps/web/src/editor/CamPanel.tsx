@@ -1,5 +1,11 @@
 import { type ChangeEvent, useRef, useState } from 'react';
-import { type CutMode, defaultCutSettings } from 'cam';
+import {
+  type CutMode,
+  defaultCutSettings,
+  generateTestGrid,
+  linspace,
+  testGridShapes,
+} from 'cam';
 import { useEditor } from './store';
 
 const MODES: CutMode[] = ['line', 'fill', 'offset-fill', 'fill+line'];
@@ -40,6 +46,20 @@ export function CamPanel() {
   const onSavePreset = (): void => {
     void store.saveLayerAsPreset(activeLayerId, presetName);
     setPresetName('');
+  };
+
+  const onInsertTestGrid = (): void => {
+    // Default 5x5 sweep of max-power (X) against speed (Y) on the active layer.
+    const grid = generateTestGrid({
+      columns: 5,
+      rows: 5,
+      xParam: 'maxPower',
+      yParam: 'speed',
+      xValues: linspace(20, 100, 5),
+      yValues: linspace(1000, 6000, 5),
+      base: settings,
+    });
+    store.insertShapes(testGridShapes(grid, activeLayerId));
   };
 
   return (
@@ -159,6 +179,15 @@ export function CamPanel() {
           onChange={onImportFile}
         />
       </div>
+
+      <button
+        type="button"
+        className="cam__testgrid"
+        data-testid="insert-testgrid"
+        onClick={onInsertTestGrid}
+      >
+        Insert test grid (5×5)
+      </button>
 
       <button
         type="button"

@@ -2,7 +2,7 @@
 
 **One line:** An offline-first, installable web app (PWA) that clones LightBurn — laser design + CAM + machine control — with a signed native companion Agent for the hardware a browser can't reach.
 
-**Status:** Pre-implementation. Planning complete; next action is `M0-T01` in `docs/03-implementation-plan.md`.
+**Status:** In implementation. M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress. Next up: finish remaining M1/M2 cards, then M3 (GRBL real-time control → MVP ship). See `docs/03-implementation-plan.md` for the live checkbox state.
 **Repo:** `git@github.com:mjmiller41/Fluence.io.git` (`main`).
 **Owner:** Michael J. Miller. Commercial product. Not affiliated with LightBurn; uses none of its trademark, logo, icons, or UI art.
 
@@ -61,4 +61,4 @@ docs/
 Read `CLAUDE.md` first (auto-loaded by Claude Code). Do one task card per session from `docs/03-implementation-plan.md`, `/clear` between cards, reference the task ID, keep `pnpm e2e:offline` green. Decisions and their rationale live in `docs/06-decision-log.md` — add to it when you make a call that future-you would want explained.
 
 ## Immediate next steps
-`M0-T01` (monorepo scaffold) → de-risk early with `M0-T05` (Clipper2→WASM in a worker) and `M3-T02` (Web Serial character-counting on a real GRBL board). Before GA: `CM-T04` (USPTO patent clearance + clean-room attestation).
+M0 foundations and the Clipper2→WASM-in-a-worker de-risk (`M0-T05`) are done. Finish the remaining M1 cards (`M1-T03` node editing, `M1-T06` text/fonts+SHX, `M1-T08`/`M1-T09` import, `M1-T10` `.lbrn` import) and M2 cards (`M2-T02`, `M2-T05`, `M2-T06`, `M2-T07`), then start M3 — de-risking `M3-T02` (Web Serial character-counting on a real GRBL board) early. Before GA: `CM-T04` (USPTO patent clearance + clean-room attestation).
