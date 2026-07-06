@@ -6,7 +6,7 @@
 - **Name:** Fluence (fluence.io). **Repo:** `git@github.com:mjmiller41/Fluence.io.git` (branch `main`).
 - **What:** offline-first, installable **PWA** cloning LightBurn (laser design + CAM + machine control), plus a signed native companion **Agent** for hardware the browser can't reach (Ruida DSP, galvo/fiber). Commercial, GRBL-first, phased to parity.
 - **Legal:** not affiliated with LightBurn. Never use the "LightBurn" trademark, logo, icons, or copied UI art.
-- **Status:** pre-implementation. **Start at `M0-T01`** in `docs/03-implementation-plan.md`.
+- **Status:** in implementation. M0 (Foundations) complete; M1 (design/vector) and M2 (CAM/G-code) in progress; M3 (GRBL control → MVP) next. See `docs/03-implementation-plan.md` for the live checkbox state.
 
 ## Docs (read the relevant one before non-trivial work)
 - `docs/01-feasibility-study.md` — constraints, market, legal.

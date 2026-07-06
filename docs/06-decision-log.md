@@ -68,4 +68,4 @@ Fluence began as a feasibility question: *is it possible to build a browser-base
 - USPTO patent clearance + clean-room attestations (`CM-T04`).
 - Confirm live LightBurn pricing/renewal figures at commercialization time.
 - Decide telemetry (external SaaS assumed) and whether cloud project-sync is in scope (would trigger a VPS split).
-- SSH key + first `git push` to the GitHub remote (pending; repo initialized locally).
+- SSH key configured; `main` pushed to the GitHub remote.
