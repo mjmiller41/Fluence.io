@@ -2,6 +2,7 @@ import { type ChangeEvent, useRef, useState } from 'react';
 import {
   type CutMode,
   defaultCutSettings,
+  type FillGrouping,
   generateTestGrid,
   linspace,
   testGridShapes,
@@ -123,6 +124,21 @@ export function CamPanel() {
             value={settings.interval}
             onChange={(e) => patch({ interval: Number(e.target.value) })}
           />
+        </label>
+      )}
+
+      {isFill && (
+        <label className="cam__field">
+          <span>Fill order</span>
+          <select
+            value={settings.fillGrouping}
+            data-testid="cam-grouping"
+            onChange={(e) => patch({ fillGrouping: e.target.value as FillGrouping })}
+          >
+            <option value="all-at-once">all at once</option>
+            <option value="groups">groups</option>
+            <option value="individually">individually</option>
+          </select>
         </label>
       )}
 

@@ -1,6 +1,6 @@
-import { flattenSubPath, type Path, type Vec2 } from 'scene';
+import { flattenSubPath, type Path, pathBounds, type Rect, type Vec2 } from 'scene';
 import { offset, type Polygons } from 'geometry-wasm';
-import type { CutSettings } from './settings';
+import type { CutSettings, FillGrouping } from './settings';
 
 /** A single continuous path the head follows while cutting. */
 export interface Toolpath {
@@ -94,6 +94,65 @@ export async function offsetFillToolpaths(
     iterations += 1;
   }
   return out;
+}
+
+/** Concatenate several shape geometries into one region set. */
+function mergePaths(geometries: Path[]): Path {
+  return geometries.flat();
+}
+
+function boundsOverlap(a: Rect, b: Rect): boolean {
+  return !(
+    a.x + a.width < b.x ||
+    b.x + b.width < a.x ||
+    a.y + a.height < b.y ||
+    b.y + b.height < a.y
+  );
+}
+
+/** Cluster geometries whose bounding boxes transitively overlap (union-find). */
+function clusterByBounds(geometries: Path[]): Path[][] {
+  const bounds = geometries.map((g) => pathBounds(g));
+  const n = geometries.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const bi = bounds[i];
+      const bj = bounds[j];
+      if (bi && bj && boundsOverlap(bi, bj)) parent[find(i)] = find(j);
+    }
+  }
+  const groups = new Map<number, Path[]>();
+  for (let i = 0; i < n; i++) {
+    const root = find(i);
+    const list = groups.get(root) ?? [];
+    list.push(geometries[i]);
+    groups.set(root, list);
+  }
+  return [...groups.values()];
+}
+
+/**
+ * Fill a set of shape geometries under a grouping strategy (M2-T02). The
+ * strategy changes the order/scope of scan lines, which is machine-visible:
+ * - `individually`: fill each shape completely before the next.
+ * - `all-at-once`: one global scan-line sweep across every shape at once.
+ * - `groups`: cluster shapes whose bounds overlap; sweep each cluster together.
+ */
+export function groupedFillToolpaths(
+  geometries: Path[],
+  interval: number,
+  angleDeg: number,
+  grouping: FillGrouping,
+): Toolpath[] {
+  if (grouping === 'individually') {
+    return geometries.flatMap((g) => fillToolpaths(g, interval, angleDeg));
+  }
+  if (grouping === 'all-at-once') {
+    return fillToolpaths(mergePaths(geometries), interval, angleDeg);
+  }
+  return clusterByBounds(geometries).flatMap((c) => fillToolpaths(mergePaths(c), interval, angleDeg));
 }
 
 /** Generate toolpaths for a shape's geometry under its cut settings. */

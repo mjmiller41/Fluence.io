@@ -24,6 +24,7 @@ export type { Toolpath } from './toolpath';
 export {
   fillToolpaths,
   generateToolpaths,
+  groupedFillToolpaths,
   lineToolpaths,
   offsetFillToolpaths,
   serializeToolpaths,
