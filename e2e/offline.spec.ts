@@ -43,6 +43,12 @@ test.describe('offline invariant', () => {
     await page.getByTestId('add-rect').click();
     await expect(page.getByTestId('shape-count')).toHaveText('2');
 
+    // Boolean union runs Clipper2 WASM in a worker from precache — merges the two
+    // overlapping rects into one shape, proving geometry works fully offline.
+    await page.getByTestId('select-all').click();
+    await page.getByTestId('op-union').click();
+    await expect(page.getByTestId('shape-count')).toHaveText('1', { timeout: 20_000 });
+
     await context.setOffline(false);
   });
 });

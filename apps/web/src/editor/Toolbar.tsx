@@ -68,10 +68,37 @@ export function Toolbar() {
         </button>
         <button
           type="button"
+          onClick={() => useEditor.getState().selectAll()}
+          data-testid="select-all"
+        >
+          All
+        </button>
+        <button
+          type="button"
           onClick={() => useEditor.getState().deleteSelection()}
           data-testid="delete"
         >
           Delete
+        </button>
+      </div>
+
+      <div className="toolbar__group">
+        <button type="button" onClick={() => void useEditor.getState().booleanAction('union')} data-testid="op-union">
+          Union
+        </button>
+        <button
+          type="button"
+          onClick={() => void useEditor.getState().booleanAction('difference')}
+          data-testid="op-difference"
+        >
+          Diff
+        </button>
+        <button
+          type="button"
+          onClick={() => void useEditor.getState().booleanAction('intersection')}
+          data-testid="op-intersect"
+        >
+          Intersect
         </button>
       </div>
 

@@ -120,18 +120,55 @@ export function xor(
   return run((m, s, c, fr) => m.XorD(s, c, fr, PRECISION), a, b, fillRule);
 }
 
-/** Polygon offset / kerf compensation (positive = outward). */
-export async function offset(polys: Polygons, delta: number): Promise<Polygons> {
+/** Weld N closed outlines into their merged boundary (self-union of all rings). */
+export function weld(groups: Polygons[], fillRule: FillRuleName = 'nonzero'): Promise<Polygons> {
+  return union(groups.flat(), [], fillRule);
+}
+
+export type JoinTypeName = 'round' | 'square' | 'miter';
+export type EndTypeName = 'polygon' | 'joined' | 'butt' | 'square' | 'round';
+
+export interface OffsetOptions {
+  /** Corner style. Default 'round'. */
+  join?: JoinTypeName;
+  /** End style. 'polygon' = closed regions (default); others offset open paths. */
+  end?: EndTypeName;
+  /** Miter limit for 'miter' joins. Default 2. */
+  miterLimit?: number;
+}
+
+/**
+ * Polygon offset / kerf compensation (positive = outward, negative = inward).
+ * With `end: 'polygon'` the input is a closed region; other end types offset an
+ * open path (kerf around a polyline).
+ */
+export async function offset(
+  polys: Polygons,
+  delta: number,
+  opts: OffsetOptions = {},
+): Promise<Polygons> {
   const mod = await initClipper();
+  const joinMap = {
+    round: mod.JoinType.Round,
+    square: mod.JoinType.Square,
+    miter: mod.JoinType.Miter,
+  };
+  const endMap = {
+    polygon: mod.EndType.Polygon,
+    joined: mod.EndType.Joined,
+    butt: mod.EndType.Butt,
+    square: mod.EndType.Square,
+    round: mod.EndType.Round,
+  };
   const paths = toPathsD(mod, polys);
   let solution: PathsD | null = null;
   try {
     solution = mod.InflatePathsD(
       paths,
       delta,
-      mod.JoinType.Round,
-      mod.EndType.Polygon,
-      2, // miter limit
+      joinMap[opts.join ?? 'round'],
+      endMap[opts.end ?? 'polygon'],
+      opts.miterLimit ?? 2,
       PRECISION,
       0, // arc tolerance (0 = auto)
     );

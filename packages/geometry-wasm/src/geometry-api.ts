@@ -1,4 +1,4 @@
-import { difference, intersection, offset, union, xor } from './clipper';
+import { difference, intersection, offset, union, weld, xor } from './clipper';
 
 /**
  * The geometry operations exposed across the worker/Comlink boundary. Kept in
@@ -6,5 +6,5 @@ import { difference, intersection, offset, union, xor } from './clipper';
  * the worker entry (worker.ts) and by tests that exercise the Comlink protocol
  * in-process.
  */
-export const geometryApi = { union, difference, intersection, xor, offset };
+export const geometryApi = { union, difference, intersection, xor, weld, offset };
 export type GeometryApi = typeof geometryApi;

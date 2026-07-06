@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { BooleanMode } from './boolean';
 import {
   addShape,
   createDocument,
@@ -21,10 +22,12 @@ export interface EditorState {
 
   setTool(tool: Tool): void;
   select(ids: ShapeId[]): void;
+  selectAll(): void;
   addShapeAction(shape: Shape): void;
   updateShape(shape: Shape): void;
   deleteSelection(): void;
   selectedShapes(): Shape[];
+  booleanAction(mode: BooleanMode): Promise<void>;
 }
 
 export const useEditor = create<EditorState>((set, get) => ({
@@ -35,6 +38,7 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   setTool: (tool) => set({ tool }),
   select: (ids) => set({ selection: ids }),
+  selectAll: () => set((s) => ({ selection: s.doc.shapes.map((sh) => sh.id) })),
 
   addShapeAction: (shape) => {
     const { doc } = get();
@@ -59,5 +63,17 @@ export const useEditor = create<EditorState>((set, get) => ({
     return selection
       .map((id) => findShape(doc, id))
       .filter((s): s is Shape => s !== undefined);
+  },
+
+  booleanAction: async (mode) => {
+    const shapes = get().selectedShapes();
+    if (shapes.length < 2) return;
+    // Lazy import keeps the Clipper2 WASM out of the initial bundle.
+    const { booleanShapes } = await import('./boolean');
+    const result = await booleanShapes(mode, shapes, shapes[0].layerId);
+    const { doc } = get();
+    for (const s of shapes) removeShape(doc, s.id);
+    addShape(doc, result);
+    set((s) => ({ selection: [result.id], version: s.version + 1 }));
   },
 }));
