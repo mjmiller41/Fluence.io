@@ -1,0 +1,17 @@
+{
+  "name": "scene",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Design domain model: document, shapes, layers, 2D geometry (paths/transforms) and editor operations (transform/align/distribute/snap). Pure TS — no DOM, no WASM — so it is fully unit-testable and shared by the editor, CAM, and file formats.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  }
+}

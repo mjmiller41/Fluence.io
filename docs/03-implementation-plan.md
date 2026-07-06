@@ -80,7 +80,7 @@ Stop when every Acceptance box passes; then mark the card [x] and commit as "<TA
 
 ## Milestone M1 — Design & vector engine
 
-- [ ] **M1-T01 — Canvas editor core + scene model** — WebGL2 renderer on OffscreenCanvas (worker), pan/zoom, selection, move/scale/rotate, align/distribute, grouping, snapping/guides, rulers, units (mm/inch). Deps: M0-T02,T05. Refs: F§6 (straightforward), D§5 M1, D§2 render. Accept: 5k-path scene stays 60fps; transforms + align/distribute correct; snapping works. Verify: `pnpm --filter web test && perf bench`.
+- [x] **M1-T01 — Canvas editor core + scene model** — WebGL2 renderer on OffscreenCanvas (worker), pan/zoom, selection, move/scale/rotate, align/distribute, grouping, snapping/guides, rulers, units (mm/inch). Deps: M0-T02,T05. Refs: F§6 (straightforward), D§5 M1, D§2 render. Accept: 5k-path scene stays 60fps; transforms + align/distribute correct; snapping works. Verify: `pnpm --filter web test && perf bench`.
 - [ ] **M1-T02 — Primitive tools** ∥ — rectangle, ellipse, polygon, line, bezier/curve creation with numeric entry. Deps: M1-T01. Refs: D§5 M1. Accept: each primitive creates exact geometry; editable params. Verify: unit tests.
 - [ ] **M1-T03 — Node editing** — full node editor: add/delete/move nodes, convert segment types (line/curve), handle manipulation, path open/close. Deps: M1-T01. Refs: F§6 (node editing), D§7. Accept: all segment types editable; matches LightBurn node-edit behaviors. Verify: unit + visual tests.
 - [ ] **M1-T04 — Boolean ops + weld** ∥ — union/difference/intersection (two shapes) and weld (N closed shapes) via Clipper2-WASM. Deps: M0-T05, M1-T01. Refs: F§5, F§6, D§7. Accept: golden geometry match for each op; weld joins N outlines. Verify: `pnpm --filter geometry-wasm test`.

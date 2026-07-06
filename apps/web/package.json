@@ -13,11 +13,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "comlink": "^4.4.2",
     "device-core": "workspace:*",
     "fileformats": "workspace:*",
     "geometry-wasm": "workspace:*",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "scene": "workspace:*",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@testing-library/react": "^16.1.0",

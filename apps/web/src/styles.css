@@ -12,50 +12,50 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
 
-.app {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+.app-shell {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  height: 100vh;
 }
 
-.app__header {
+.app-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
+  background: var(--panel);
 }
 
-.app__header h1 {
+.app-bar h1 {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: 1.15rem;
   letter-spacing: -0.02em;
 }
 
-.app__subtitle {
-  margin: 0;
+.app-bar__milestone {
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .badge {
   margin-left: auto;
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -69,57 +69,62 @@ body {
   color: var(--accent);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.1rem;
+.toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: #0f151c;
+  flex-wrap: wrap;
 }
 
-.card h2 {
-  margin: 0;
-  font-size: 1rem;
+.toolbar__group {
+  display: flex;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--border);
 }
 
-.card__desc {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.85rem;
+.toolbar__spacer {
   flex: 1;
 }
 
-.card button {
-  align-self: flex-start;
-  background: var(--accent);
-  color: #1a0d06;
-  border: 0;
-  border-radius: 8px;
-  padding: 0.5rem 0.9rem;
-  font-weight: 600;
+.toolbar__count {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-width: 2ch;
+  text-align: right;
+}
+
+.toolbar button {
+  background: #1a2430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
-.card button:hover {
-  filter: brightness(1.08);
+.toolbar button:hover {
+  border-color: var(--accent);
 }
 
-.card output {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.85rem;
-  color: var(--text);
-  background: #0a0e13;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.4rem 0.55rem;
-  min-height: 1.4rem;
-  word-break: break-word;
+.toolbar button.active {
+  background: var(--accent);
+  color: #1a0d06;
+  border-color: var(--accent);
+}
+
+.editor-canvas {
+  position: relative;
+  overflow: hidden;
+  background: #0b0e13;
+}
+
+.editor-canvas canvas {
+  display: block;
+  touch-action: none;
 }
