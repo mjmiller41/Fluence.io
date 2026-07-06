@@ -1,0 +1,36 @@
+# secrets — never commit (see CLAUDE.md)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+license-signing.key
+
+# node / pnpm
+node_modules/
+.pnpm-store/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+
+# rust (apps/agent)
+target/
+**/target/
+
+# wasm build artifacts
+*.wasm.map
+emsdk/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# local infra
+/backups/
