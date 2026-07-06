@@ -43,6 +43,9 @@ importers:
 
   apps/web:
     dependencies:
+      cam:
+        specifier: workspace:*
+        version: link:../../packages/cam
       comlink:
         specifier: ^4.4.2
         version: 4.4.2

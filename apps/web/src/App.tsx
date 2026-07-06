@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CamPanel } from './editor/CamPanel';
 import { EditorCanvas } from './editor/EditorCanvas';
 import { LayersPanel } from './editor/LayersPanel';
 import { Toolbar } from './editor/Toolbar';
@@ -21,7 +22,7 @@ export function App() {
     <div className="app-shell">
       <header className="app-bar">
         <h1 data-testid="app-title">Fluence</h1>
-        <span className="app-bar__milestone">M1 · Design &amp; vector engine</span>
+        <span className="app-bar__milestone">M2 · CAM &amp; G-code</span>
         <span
           className={`badge ${online ? 'badge--online' : 'badge--offline'}`}
           data-testid="net-status"
@@ -32,7 +33,10 @@ export function App() {
       <Toolbar />
       <div className="editor-body">
         <EditorCanvas />
-        <LayersPanel />
+        <div className="side-panels">
+          <LayersPanel />
+          <CamPanel />
+        </div>
       </div>
     </div>
   );

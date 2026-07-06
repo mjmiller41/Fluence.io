@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "cam": "workspace:*",
     "comlink": "^4.4.2",
     "device-core": "workspace:*",
     "fileformats": "workspace:*",

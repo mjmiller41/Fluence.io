@@ -130,7 +130,7 @@ export function EditorCanvas() {
   function draw(): void {
     const renderer = rendererRef.current;
     if (!renderer) return;
-    const { doc, selection } = useEditor.getState();
+    const { doc, selection, gcode, showGcodePreview, version } = useEditor.getState();
 
     const bed: LineBatch = {
       layerId: '__bed',
@@ -138,6 +138,20 @@ export function EditorCanvas() {
       segments: new Float32Array(rectSegments({ x: 0, y: 0, width: doc.width, height: doc.height })),
     };
     const batches = [bed, ...sceneToLineBatches(doc, 0.1)];
+
+    // G-code simulation overlay: travel (dim) under cut (cyan). Hidden once the
+    // design changes out from under the last-generated result (version drift).
+    if (showGcodePreview && gcode && gcode.version === version) {
+      const cut: number[] = [];
+      const travel: number[] = [];
+      for (const seg of gcode.sim.segments) {
+        const bucket = seg.cut ? cut : travel;
+        bucket.push(seg.from.x, seg.from.y, seg.to.x, seg.to.y);
+      }
+      batches.push({ layerId: '__travel', color: '#3a4c63', segments: new Float32Array(travel) });
+      batches.push({ layerId: '__cut', color: '#22d3ee', segments: new Float32Array(cut) });
+    }
+
     if (previewBatch.current) batches.push(previewBatch.current);
 
     const selSegments: number[] = [];

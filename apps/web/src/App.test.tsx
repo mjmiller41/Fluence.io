@@ -32,4 +32,16 @@ describe('editor app', () => {
     fireEvent.click(screen.getByTestId('add-layer'));
     expect(useEditor.getState().doc.layers.length).toBe(before + 1);
   });
+
+  it('renders the CAM panel; editing mode updates settings, save is gated on generation', () => {
+    render(<App />);
+    expect(screen.getByTestId('cam-panel')).toBeTruthy();
+    expect(screen.getByTestId('generate-gcode')).toBeTruthy();
+    // No result yet -> nothing to save.
+    expect(screen.queryByTestId('save-gcode')).toBeNull();
+
+    const active = useEditor.getState().activeLayerId;
+    fireEvent.change(screen.getByTestId('cam-mode'), { target: { value: 'fill' } });
+    expect(useEditor.getState().cutSettingsByLayer[active].mode).toBe('fill');
+  });
 });

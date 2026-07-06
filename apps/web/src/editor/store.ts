@@ -19,8 +19,32 @@ import {
   updateLayerCommand,
   updateShapeCommand,
 } from 'scene';
+import { type CutSettings, defaultCutSettings } from 'cam';
+import type { MachineConfig, Simulation } from 'fileformats';
 
 export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon';
+
+/**
+ * Default GRBL machine profile. Kept as a literal (rather than importing
+ * `defaultMachine()` from `fileformats`) so the fileformats codec bundle stays
+ * lazily loaded — it is only pulled in on generate/save/open, not app boot.
+ */
+const DEFAULT_MACHINE: MachineConfig = {
+  units: 'mm',
+  powerMax: 1000,
+  laserMode: 'M4',
+  travelSpeed: 6000,
+  returnToOrigin: true,
+};
+
+/** A generated G-code result plus the simulation used for preview/estimates. */
+export interface GcodeResult {
+  text: string;
+  sim: Simulation;
+  /** Document version it was generated from; if it differs from the store's
+   *  current version, the design changed and the result is stale. */
+  version: number;
+}
 
 export interface EditorState {
   doc: Document;
@@ -30,6 +54,13 @@ export interface EditorState {
   tool: Tool;
   /** Bumped whenever the (mutable) document changes so views re-render/redraw. */
   version: number;
+
+  /** Per-layer cut settings (CAM). Missing layers fall back to defaults. */
+  cutSettingsByLayer: Record<LayerId, CutSettings>;
+  machine: MachineConfig;
+  gcode: GcodeResult | null;
+  gcodeBusy: boolean;
+  showGcodePreview: boolean;
 
   setTool(tool: Tool): void;
   select(ids: ShapeId[]): void;
@@ -50,6 +81,14 @@ export interface EditorState {
   addLayerAction(): void;
   updateLayer(id: LayerId, patch: Partial<Omit<Layer, 'id'>>): void;
 
+  /** Merge a cut-settings patch for one layer (creating defaults if absent). */
+  setLayerCutSettings(id: LayerId, patch: Partial<CutSettings>): void;
+  /** Build CAM job -> G-code -> simulation in the CAM worker (off main thread). */
+  generateGcode(): Promise<void>;
+  /** Save the last generated G-code to disk (File System Access, download fallback). */
+  saveGcode(): Promise<void>;
+  toggleGcodePreview(): void;
+
   loadDocument(doc: Document): void;
   saveProject(): Promise<void>;
   openProject(): Promise<void>;
@@ -69,6 +108,12 @@ export const useEditor = create<EditorState>((set, get) => ({
   activeLayerId: initialDoc.layers[0].id,
   tool: 'select',
   version: 0,
+
+  cutSettingsByLayer: {},
+  machine: DEFAULT_MACHINE,
+  gcode: null,
+  gcodeBusy: false,
+  showGcodePreview: true,
 
   setTool: (tool) => set({ tool }),
   select: (ids) => set({ selection: ids }),
@@ -143,12 +188,70 @@ export const useEditor = create<EditorState>((set, get) => ({
     set((s) => ({ version: s.version + 1 }));
   },
 
+  setLayerCutSettings: (id, patch) => {
+    set((s) => ({
+      cutSettingsByLayer: {
+        ...s.cutSettingsByLayer,
+        [id]: { ...(s.cutSettingsByLayer[id] ?? defaultCutSettings()), ...patch },
+      },
+      version: s.version + 1,
+    }));
+  },
+
+  generateGcode: async () => {
+    if (get().gcodeBusy) return;
+    const { doc, cutSettingsByLayer, machine, version } = get();
+    set({ gcodeBusy: true });
+    const { createCamClient } = await import('../cam/cam-client');
+    const client = createCamClient();
+    try {
+      const { gcode, simulation } = await client.api.generate(doc, cutSettingsByLayer, machine);
+      set({ gcode: { text: gcode, sim: simulation, version }, showGcodePreview: true });
+    } finally {
+      client.terminate();
+      set({ gcodeBusy: false });
+    }
+  },
+
+  saveGcode: async () => {
+    const { gcode } = get();
+    if (!gcode) return;
+    const blob = new Blob([gcode.text], { type: 'text/plain' });
+    const picker = (
+      globalThis as unknown as {
+        showSaveFilePicker?: (opts: unknown) => Promise<{
+          createWritable(): Promise<{ write(d: Blob): Promise<void>; close(): Promise<void> }>;
+        }>;
+      }
+    ).showSaveFilePicker;
+    if (typeof picker === 'function') {
+      const handle = await picker({
+        suggestedName: 'fluence.gcode',
+        types: [{ description: 'G-code', accept: { 'text/plain': ['.gcode', '.nc'] } }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fluence.gcode';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  },
+
+  toggleGcodePreview: () => set((s) => ({ showGcodePreview: !s.showGcodePreview })),
+
   loadDocument: (doc) =>
     set((s) => ({
       doc,
       history: new History(),
       selection: [],
       activeLayerId: doc.layers[0].id,
+      cutSettingsByLayer: {},
+      gcode: null,
       version: s.version + 1,
     })),
 
