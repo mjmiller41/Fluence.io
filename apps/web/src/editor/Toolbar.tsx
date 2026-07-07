@@ -89,7 +89,18 @@ export function Toolbar() {
             {t.label}
           </button>
         ))}
+        <button
+          type="button"
+          className={tool === 'node' ? 'active' : ''}
+          onClick={() => useEditor.getState().enterNodeEdit()}
+          data-testid="tool-node"
+          title="Edit nodes (double-click a shape)"
+        >
+          Nodes
+        </button>
       </div>
+
+      {tool === 'node' && <NodeEditGroup />}
 
       <div className="toolbar__group">
         <button type="button" onClick={addExactRect} data-testid="add-rect">
@@ -149,6 +160,49 @@ export function Toolbar() {
       <span className="toolbar__count" data-testid="shape-count">
         {shapeCount}
       </span>
+    </div>
+  );
+}
+
+/** Node-editor controls (M1-T03), shown only while the node tool is active. */
+function NodeEditGroup() {
+  const nodeSel = useEditor((s) => s.nodeSel);
+  const version = useEditor((s) => s.version);
+  void version;
+  // The edge acted on by segment controls: the one arriving at the selected
+  // node (or, for a start node with no incoming edge, the one leaving it).
+  const segIndex = nodeSel && nodeSel.node >= 1 ? nodeSel.node - 1 : 0;
+  return (
+    <div className="toolbar__group" data-testid="node-edit-group">
+      <button
+        type="button"
+        disabled={!nodeSel}
+        onClick={() => nodeSel && useEditor.getState().deleteNodeAction(nodeSel)}
+        data-testid="node-delete"
+      >
+        Del node
+      </button>
+      <button
+        type="button"
+        disabled={!nodeSel}
+        onClick={() => nodeSel && useEditor.getState().toggleSegmentType(nodeSel.subpath, segIndex)}
+        data-testid="node-toggle-seg"
+        title="Convert segment line ↔ curve"
+      >
+        Line/Curve
+      </button>
+      <button
+        type="button"
+        disabled={!nodeSel}
+        onClick={() => nodeSel && useEditor.getState().toggleSubpathClosed(nodeSel.subpath)}
+        data-testid="node-toggle-closed"
+        title="Open / close this subpath"
+      >
+        Open/Close
+      </button>
+      <button type="button" onClick={() => useEditor.getState().exitNodeEdit()} data-testid="node-done">
+        Done
+      </button>
     </div>
   );
 }
