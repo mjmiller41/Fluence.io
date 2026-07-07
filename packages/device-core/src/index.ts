@@ -22,3 +22,12 @@ export {
   type TransportFactory,
 } from './transport';
 export { FakeDevice, type FakeDeviceOptions } from './fake-device';
+export {
+  GRBL_BAUD,
+  isWebSerialSupported,
+  listSerialPorts,
+  requestSerialPort,
+  type SerialPortLike,
+  WebSerialTransport,
+  type WebSerialConfig,
+} from './webserial-transport';
