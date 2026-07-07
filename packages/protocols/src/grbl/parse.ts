@@ -72,6 +72,16 @@ export function parseResponse(line: string): GrblResponse | null {
   if (t.startsWith('<') && t.endsWith('>')) return parseStatus(t);
   const welcome = /^Grbl\s+(\S+)/.exec(t);
   if (welcome) return { type: 'welcome', version: welcome[1] };
+  // Marlin M114 position report: "X:0.00 Y:0.00 Z:0.00 E:0.00 Count ...".
+  const m114 = /^X:(-?[\d.]+)\s+Y:(-?[\d.]+)\s+Z:(-?[\d.]+)/.exec(t);
+  if (m114) {
+    return {
+      type: 'status',
+      state: 'idle',
+      raw: 'Marlin',
+      mpos: { x: Number(m114[1]), y: Number(m114[2]), z: Number(m114[3]) },
+    };
+  }
   return { type: 'message', text: t };
 }
 

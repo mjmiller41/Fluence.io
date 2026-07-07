@@ -28,3 +28,4 @@ export {
   type GrblDeviceOptions,
   type TimerHost,
 } from './grbl/grbl-device';
+export { DEFAULT_PROFILE, type DeviceProfile, PROFILES } from './grbl/profiles';

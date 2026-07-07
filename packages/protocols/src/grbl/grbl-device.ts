@@ -24,6 +24,7 @@ import type {
   Vec3,
 } from 'device-core';
 import { alarmMessage, errorMessage, type GrblResponse, parseResponse, REALTIME, splitLines } from './parse';
+import { DEFAULT_PROFILE, type DeviceProfile } from './profiles';
 
 /** A raw console line, direction-tagged (M3-T04). */
 export interface ConsoleEntry {
@@ -52,8 +53,10 @@ const defaultTimers: TimerHost = {
 
 export interface GrblDeviceOptions {
   id?: string;
-  /** Controller serial RX buffer size in bytes (GRBL default 127). */
+  /** Controller serial RX buffer size in bytes (overrides the profile default). */
   bufferSize?: number;
+  /** Dialect profile (GRBL, GRBL-M3, Smoothieware, Marlin, …). Defaults to GRBL. */
+  profile?: DeviceProfile;
   /** Interval timer host for `?` status polling (defaults to setInterval). */
   timers?: TimerHost;
 }
@@ -64,6 +67,7 @@ const lineBytes = (line: string): number => enc.encode(line).length + 1; // + ne
 export class GrblDevice implements Device {
   readonly id: string;
   readonly transportKind: string;
+  readonly profile: DeviceProfile;
 
   private readonly bufferSize: number;
   private readonly timers: TimerHost;
@@ -93,7 +97,8 @@ export class GrblDevice implements Device {
   ) {
     this.id = opts.id ?? 'grbl-0';
     this.transportKind = transport.kind;
-    this.bufferSize = opts.bufferSize ?? 127;
+    this.profile = opts.profile ?? DEFAULT_PROFILE;
+    this.bufferSize = opts.bufferSize ?? this.profile.bufferSize;
     this.timers = opts.timers ?? defaultTimers;
   }
 
@@ -269,9 +274,13 @@ export class GrblDevice implements Device {
     this.abortStream('stopped');
   }
 
-  /** Request a status report (`?`); the response updates state/position. */
+  /**
+   * Request a status report. GRBL-family controllers answer the real-time `?`
+   * byte; Marlin has no real-time status, so poll `M114` as a normal line.
+   */
   async requestStatus(): Promise<void> {
-    await this.send(new Uint8Array([REALTIME.STATUS]));
+    if (this.profile.realtimeStatus) await this.send(new Uint8Array([REALTIME.STATUS]));
+    else await this.send(this.line('M114'));
   }
 
   // ---- internals ----
@@ -309,16 +318,24 @@ export class GrblDevice implements Device {
     return n;
   }
 
-  /** Send as many queued lines as the RX buffer can hold (char-counting). */
+  /**
+   * Send queued lines subject to the profile's flow control: char-counting fills
+   * the RX buffer by bytes; ping-pong (Marlin) sends one line and waits for `ok`.
+   */
   private pump(): void {
     if (!this.running || this.held) return;
     while (this.cursor < this.lines.length) {
       const bytes = lineBytes(this.lines[this.cursor]);
-      // Always admit one line even if larger than the buffer (never deadlock).
-      if (this.inFlight.length > 0 && this.bufferUsed() + bytes > this.bufferSize) break;
+      if (this.profile.flowControl === 'ping-pong') {
+        if (this.inFlight.length > 0) break;
+      } else if (this.inFlight.length > 0 && this.bufferUsed() + bytes > this.bufferSize) {
+        // Always admit one line even if larger than the buffer (never deadlock).
+        break;
+      }
       void this.send(this.line(this.lines[this.cursor]));
       this.inFlight.push(bytes);
       this.cursor++;
+      if (this.profile.flowControl === 'ping-pong') break;
     }
     this.emit();
   }
