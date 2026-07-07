@@ -258,6 +258,14 @@ export class GrblDevice implements Device {
     await this.send(this.line('G10 L20 P0 X0 Y0'));
   }
 
+  /** Send a raw command line (console entry). Not allowed mid-stream. */
+  async sendCommand(text: string): Promise<void> {
+    this.ensureConnected();
+    if (this.running) throw new Error('Cannot send a command while a job is streaming');
+    const trimmed = text.trim();
+    if (trimmed) await this.send(this.line(trimmed));
+  }
+
   async hold(): Promise<void> {
     this.held = true;
     await this.send(new Uint8Array([REALTIME.HOLD]));

@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import opentype from 'opentype.js';
 import { App } from './App';
 import { useEditor } from './editor/store';
+import { createSimController } from './device/controller';
 
 /** A tiny self-contained font (glyph 'A' = 500×700 rectangle) for text tests. */
 function testFontBytes(): Uint8Array {
@@ -230,6 +231,60 @@ describe('editor app', () => {
     // Toolbar text controls are present.
     expect(screen.getByTestId('add-text')).toBeTruthy();
     expect(screen.getByTestId('load-font')).toBeTruthy();
+  });
+
+  it('connects the Simulator and jogs from the machine panel (machine UI)', async () => {
+    render(<App />);
+    expect(screen.getByTestId('machine-panel')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('connect-sim'));
+    await screen.findByTestId('machine-status');
+    expect(screen.getByTestId('machine-state').textContent).toBe('idle');
+    expect(screen.getByTestId('jog-pad')).toBeTruthy();
+
+    // Jog +X by the step (default 10 mm); position updates from device status.
+    fireEvent.click(screen.getByTestId('jog-xplus'));
+    await waitFor(() => expect(screen.getByTestId('machine-pos').textContent).toMatch(/X10\.00/));
+
+    fireEvent.click(screen.getByTestId('disconnect-machine'));
+    await waitFor(() => expect(screen.queryByTestId('machine-status')).toBeNull());
+  });
+
+  it('streams a G-code job with progress + console, and forwards controls (machine store)', async () => {
+    render(<App />);
+    await useEditor
+      .getState()
+      .connectWith(createSimController({ msPerLine: 0, sleep: () => Promise.resolve() }), 'sim');
+    expect(useEditor.getState().connectionKind).toBe('sim');
+
+    // Inject a generated G-code result and run it.
+    useEditor.setState({
+      gcode: {
+        text: 'G0 X0\nG1 X10 Y10\nG1 X0 Y0',
+        sim: {
+          segments: [],
+          cutDistance: 0,
+          travelDistance: 0,
+          cutSeconds: 0,
+          travelSeconds: 0,
+          totalSeconds: 0,
+          bounds: null,
+        },
+        version: useEditor.getState().version,
+      },
+    });
+    await useEditor.getState().runJob();
+    expect(useEditor.getState().machineStatus?.progress).toBe(1);
+    expect(useEditor.getState().jobRunning).toBe(false);
+    expect(useEditor.getState().deviceConsole.some((e) => e.text.includes('streaming'))).toBe(true);
+
+    // Console command + forwarding of hold/stop (no-ops when idle, must not throw).
+    await useEditor.getState().sendConsole('$H');
+    expect(useEditor.getState().deviceConsole.some((e) => e.dir === 'tx' && e.text === '$H')).toBe(true);
+    await useEditor.getState().holdJob();
+    await useEditor.getState().stopJob();
+
+    await useEditor.getState().disconnectMachine();
+    expect(useEditor.getState().connectionKind).toBeNull();
   });
 
   it('saves the selection as art and re-inserts it with fresh ids', () => {

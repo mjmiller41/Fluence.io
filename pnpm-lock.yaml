@@ -58,6 +58,9 @@ importers:
       geometry-wasm:
         specifier: workspace:*
         version: link:../../packages/geometry-wasm
+      protocols:
+        specifier: workspace:*
+        version: link:../../packages/protocols
       react:
         specifier: ^19.2.7
         version: 19.2.7

@@ -12,6 +12,7 @@ import {
   createLayer,
   deleteNode,
   type Document,
+  documentBounds,
   emptyArtLibrary,
   findShape,
   getArtItem,
@@ -48,6 +49,9 @@ import {
   starterLibrary,
 } from 'cam';
 import type { MachineConfig, MachineOrigin, Simulation } from 'fileformats';
+import type { Bounds, DeviceStatus, Vec3 } from 'device-core';
+import type { ConsoleEntry } from 'protocols';
+import { createSimController, type MachineController } from '../device/controller';
 
 export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon' | 'node';
 
@@ -203,7 +207,38 @@ export interface EditorState {
   redo(): void;
   canUndo(): boolean;
   canRedo(): boolean;
+
+  // --- Machine control (device) ---
+  /** The active machine controller (Simulator or GRBL worker), or null. */
+  machineCtl: MachineController | null;
+  connectionKind: 'sim' | 'grbl' | null;
+  /** A connect/disconnect is in progress. */
+  machineBusy: boolean;
+  machineStatus: DeviceStatus | null;
+  deviceConsole: ConsoleEntry[];
+  jobRunning: boolean;
+
+  /** Connect via the Simulator, or a GRBL board over Web Serial (worker). */
+  connectMachine(kind: 'sim' | 'grbl', profileId?: string): Promise<void>;
+  /** Attach an already-built controller (used by connectMachine and tests). */
+  connectWith(controller: MachineController, kind: 'sim' | 'grbl'): Promise<void>;
+  disconnectMachine(): Promise<void>;
+  /** Stream the last-generated G-code to the machine (progress via status). */
+  runJob(): Promise<void>;
+  holdJob(): Promise<void>;
+  resumeJob(): Promise<void>;
+  stopJob(): Promise<void>;
+  jogMachine(delta: Vec3, feed: number): Promise<void>;
+  frameJob(opts?: { power?: number }): Promise<void>;
+  homeMachine(): Promise<void>;
+  setWorkOrigin(): Promise<void>;
+  sendConsole(text: string): Promise<void>;
+  clearConsole(): void;
 }
+
+/** Console cap + the current connection's status/console unsubscribers. */
+const MAX_CONSOLE = 500;
+let machineUnsubs: Array<() => void> = [];
 
 const initialDoc = createDocument();
 
@@ -225,6 +260,13 @@ export const useEditor = create<EditorState>((set, get) => ({
   showGcodePreview: true,
   library: starterLibrary(),
   artLibrary: emptyArtLibrary(),
+
+  machineCtl: null,
+  connectionKind: null,
+  machineBusy: false,
+  machineStatus: null,
+  deviceConsole: [],
+  jobRunning: false,
 
   setTool: (tool) => set({ tool }),
   select: (ids) => set({ selection: ids }),
@@ -595,6 +637,98 @@ export const useEditor = create<EditorState>((set, get) => ({
     if (!loaded) return;
     get().loadDocument(deserializeLaserKerf(loaded.bytes).document);
   },
+
+  connectWith: async (controller, kind) => {
+    await get().disconnectMachine();
+    set({ machineBusy: true });
+    try {
+      machineUnsubs = [
+        controller.onStatus((s) => set({ machineStatus: s })),
+        controller.onConsole((e) =>
+          set((st) => ({ deviceConsole: [...st.deviceConsole, e].slice(-MAX_CONSOLE) })),
+        ),
+      ];
+      await controller.connect();
+      set({ machineCtl: controller, connectionKind: kind, machineStatus: controller.status() });
+    } catch (err) {
+      machineUnsubs.forEach((f) => f());
+      machineUnsubs = [];
+      set({ machineCtl: null, connectionKind: null });
+      throw err;
+    } finally {
+      set({ machineBusy: false });
+    }
+  },
+
+  connectMachine: async (kind, profileId) => {
+    if (kind === 'sim') {
+      await get().connectWith(createSimController(), 'sim');
+      return;
+    }
+    const { connectGrbl } = await import('../device/worker-controller');
+    await get().connectWith(await connectGrbl(profileId), 'grbl');
+  },
+
+  disconnectMachine: async () => {
+    const ctl = get().machineCtl;
+    machineUnsubs.forEach((f) => f());
+    machineUnsubs = [];
+    set({ machineCtl: null, connectionKind: null, machineStatus: null, jobRunning: false });
+    if (ctl) await ctl.disconnect();
+  },
+
+  runJob: async () => {
+    const { machineCtl, gcode, jobRunning } = get();
+    if (!machineCtl || !gcode || jobRunning) return;
+    const lines = gcode.text
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    if (lines.length === 0) return;
+    set({ jobRunning: true });
+    try {
+      await machineCtl.stream(lines).done;
+    } finally {
+      set({ jobRunning: false });
+    }
+  },
+
+  holdJob: async () => {
+    await get().machineCtl?.hold();
+  },
+  resumeJob: async () => {
+    await get().machineCtl?.resume();
+  },
+  stopJob: async () => {
+    await get().machineCtl?.stop();
+  },
+
+  jogMachine: async (delta, feed) => {
+    if (!get().jobRunning) await get().machineCtl?.jog(delta, feed);
+  },
+
+  frameJob: async (opts) => {
+    const { machineCtl, doc, jobRunning } = get();
+    if (!machineCtl || jobRunning) return;
+    const b = documentBounds(doc);
+    if (!b) return;
+    const bounds: Bounds = {
+      min: { x: b.x, y: b.y },
+      max: { x: b.x + b.width, y: b.y + b.height },
+    };
+    await machineCtl.frame(bounds, opts);
+  },
+
+  homeMachine: async () => {
+    if (!get().jobRunning) await get().machineCtl?.home();
+  },
+  setWorkOrigin: async () => {
+    if (!get().jobRunning) await get().machineCtl?.setWorkOrigin();
+  },
+  sendConsole: async (text) => {
+    await get().machineCtl?.sendCommand(text);
+  },
+  clearConsole: () => set({ deviceConsole: [] }),
 
   undo: () => {
     if (get().history.undo()) set((s) => ({ selection: [], version: s.version + 1 }));

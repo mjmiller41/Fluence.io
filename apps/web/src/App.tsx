@@ -3,6 +3,7 @@ import { ArtPanel } from './editor/ArtPanel';
 import { CamPanel } from './editor/CamPanel';
 import { EditorCanvas } from './editor/EditorCanvas';
 import { LayersPanel } from './editor/LayersPanel';
+import { MachinePanel } from './editor/MachinePanel';
 import { Toolbar } from './editor/Toolbar';
 import { useEditor } from './editor/store';
 
@@ -31,7 +32,7 @@ export function App() {
     <div className="app-shell">
       <header className="app-bar">
         <h1 data-testid="app-title">LaserKerf</h1>
-        <span className="app-bar__milestone">M2 · CAM &amp; G-code</span>
+        <span className="app-bar__milestone">M3 · GRBL control</span>
         <span
           className={`badge ${online ? 'badge--online' : 'badge--offline'}`}
           data-testid="net-status"
@@ -45,6 +46,7 @@ export function App() {
         <div className="side-panels">
           <LayersPanel />
           <CamPanel />
+          <MachinePanel />
           <ArtPanel />
         </div>
       </div>
