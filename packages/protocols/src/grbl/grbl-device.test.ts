@@ -235,6 +235,49 @@ describe('GrblDevice real-time controls (M3-T03)', () => {
     expect((await h.done).status).toBe('completed');
   });
 
+  it('frames the bounds as a laser-off rapid box (M3-T05)', async () => {
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock);
+    const tx: string[] = [];
+    dev.onConsole((e) => e.dir === 'tx' && tx.push(e.text));
+    await dev.connect();
+    await dev.frame({ min: { x: 0, y: 0 }, max: { x: 100, y: 50 } });
+    // G90 + 5 rapid corners (min→max→back to start), no laser S word.
+    expect(tx).toEqual([
+      'G90',
+      'G0 X0.000 Y0.000',
+      'G0 X100.000 Y0.000',
+      'G0 X100.000 Y50.000',
+      'G0 X0.000 Y50.000',
+      'G0 X0.000 Y0.000',
+    ]);
+    expect(tx.some((l) => /S\d/.test(l))).toBe(false);
+  });
+
+  it('runs a low-power outline when power is given (M3-T05)', async () => {
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock);
+    const tx: string[] = [];
+    dev.onConsole((e) => e.dir === 'tx' && tx.push(e.text));
+    await dev.connect();
+    await dev.frame({ min: { x: 0, y: 0 }, max: { x: 10, y: 10 } }, { power: 20, feed: 2000 });
+    expect(tx).toContain('M3 S20');
+    expect(tx).toContain('M5');
+    expect(tx.some((l) => l.startsWith('G1') && l.includes('F2000'))).toBe(true);
+  });
+
+  it('homes with $H and sets the work origin with G10 L20 (M3-T05)', async () => {
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock);
+    const tx: string[] = [];
+    dev.onConsole((e) => e.dir === 'tx' && tx.push(e.text));
+    await dev.connect();
+    await dev.home();
+    await dev.setWorkOrigin();
+    expect(tx).toContain('$H');
+    expect(tx).toContain('G10 L20 P0 X0 Y0');
+  });
+
   it('cancels a jog with the real-time byte', async () => {
     const mock = new MockGrbl();
     const dev = new GrblDevice(mock);
