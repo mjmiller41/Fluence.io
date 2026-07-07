@@ -31,7 +31,7 @@ class MockGrbl implements Transport {
     return () => this.listeners.delete(cb);
   }
   async write(data: Uint8Array): Promise<void> {
-    if (data.length === 1 && [0x3f, 0x21, 0x7e, 0x18].includes(data[0])) {
+    if (data.length === 1 && [0x3f, 0x21, 0x7e, 0x18, 0x85].includes(data[0])) {
       this.realtime.push(data[0]);
       if (data[0] === REALTIME.STATUS) this.reply('<Run|MPos:1.000,2.000,0.000>');
       return;
@@ -160,5 +160,53 @@ describe('GrblDevice streaming (char-counting)', () => {
     await dev.stop();
     expect(mock.realtime).toContain(REALTIME.RESET);
     expect((await handle.done).status).toBe('stopped');
+  });
+});
+
+describe('GrblDevice real-time controls (M3-T03)', () => {
+  it('polls ? on an interval and stops cleanly', async () => {
+    const captured: Array<() => void> = [];
+    let cleared = false;
+    const timers = {
+      set: (fn: () => void) => {
+        captured.push(fn);
+        return 1;
+      },
+      clear: () => {
+        cleared = true;
+      },
+    };
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock, { timers });
+    await dev.connect();
+    dev.startStatusPoll(200);
+    captured[0]?.();
+    captured[0]?.();
+    await tick();
+    // Two poll ticks → two '?' real-time bytes.
+    expect(mock.realtime.filter((b) => b === REALTIME.STATUS)).toHaveLength(2);
+    dev.stopStatusPoll();
+    expect(cleared).toBe(true);
+  });
+
+  it('cancels a jog with the real-time byte', async () => {
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock);
+    await dev.connect();
+    await dev.cancelJog();
+    expect(mock.realtime).toContain(REALTIME.JOG_CANCEL);
+  });
+
+  it('sends a hold real-time byte during a stream (bypasses the line buffer)', async () => {
+    const mock = new MockGrbl();
+    const dev = new GrblDevice(mock, { bufferSize: 16 });
+    await dev.connect();
+    // Many lines queued; buffer tiny so most are still pending.
+    dev.stream({ lines: Array.from({ length: 50 }, (_, i) => `G1 X${i}.000`) });
+    await tick();
+    expect(mock.pending.length).toBeGreaterThan(0); // job not drained
+    await dev.hold();
+    // The '!' reached the controller even though line writes are still outstanding.
+    expect(mock.realtime).toContain(REALTIME.HOLD);
   });
 });

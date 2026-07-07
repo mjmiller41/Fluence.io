@@ -15,4 +15,4 @@ export {
   type ConformanceResult,
 } from './conformance/harness';
 export { type GrblResponse, parseResponse, REALTIME, splitLines } from './grbl/parse';
-export { GrblDevice, type GrblDeviceOptions } from './grbl/grbl-device';
+export { GrblDevice, type GrblDeviceOptions, type TimerHost } from './grbl/grbl-device';

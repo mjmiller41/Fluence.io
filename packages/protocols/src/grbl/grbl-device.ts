@@ -25,10 +25,23 @@ import type {
 } from 'device-core';
 import { type GrblResponse, parseResponse, REALTIME, splitLines } from './parse';
 
+/** Injectable interval timer (so status polling is testable without wall-clock). */
+export interface TimerHost {
+  set(fn: () => void, ms: number): unknown;
+  clear(handle: unknown): void;
+}
+
+const defaultTimers: TimerHost = {
+  set: (fn, ms) => setInterval(fn, ms),
+  clear: (h) => clearInterval(h as ReturnType<typeof setInterval>),
+};
+
 export interface GrblDeviceOptions {
   id?: string;
   /** Controller serial RX buffer size in bytes (GRBL default 127). */
   bufferSize?: number;
+  /** Interval timer host for `?` status polling (defaults to setInterval). */
+  timers?: TimerHost;
 }
 
 const enc = new TextEncoder();
@@ -39,6 +52,8 @@ export class GrblDevice implements Device {
   readonly transportKind: string;
 
   private readonly bufferSize: number;
+  private readonly timers: TimerHost;
+  private pollHandle: unknown = null;
   private readonly listeners = new Set<StatusListener>();
   private unsubscribe: (() => void) | null = null;
   private rx = '';
@@ -64,6 +79,7 @@ export class GrblDevice implements Device {
     this.id = opts.id ?? 'grbl-0';
     this.transportKind = transport.kind;
     this.bufferSize = opts.bufferSize ?? 127;
+    this.timers = opts.timers ?? defaultTimers;
   }
 
   async connect(): Promise<void> {
@@ -75,12 +91,26 @@ export class GrblDevice implements Device {
   }
 
   async disconnect(): Promise<void> {
+    this.stopStatusPoll();
     this.abortStream('stopped');
     this.unsubscribe?.();
     this.unsubscribe = null;
     if (this.transport.isOpen) await this.transport.close();
     this.state = 'disconnected';
     this.emit();
+  }
+
+  /** Begin polling `?` at `intervalMs` so status/position stay live (M3-T03). */
+  startStatusPoll(intervalMs = 200): void {
+    this.stopStatusPoll();
+    this.pollHandle = this.timers.set(() => void this.requestStatus(), intervalMs);
+  }
+
+  stopStatusPoll(): void {
+    if (this.pollHandle !== null) {
+      this.timers.clear(this.pollHandle);
+      this.pollHandle = null;
+    }
   }
 
   status(): DeviceStatus {
@@ -133,6 +163,11 @@ export class GrblDevice implements Device {
       d.z ? `Z${d.z.toFixed(3)}` : '',
     ].join('');
     await this.send(this.line(`$J=G91 ${axes} F${opts.feed}`));
+  }
+
+  /** Instantly cancel any in-progress jog (real-time byte, bypasses the buffer). */
+  async cancelJog(): Promise<void> {
+    await this.send(new Uint8Array([REALTIME.JOG_CANCEL]));
   }
 
   async frame(bounds: Bounds, opts: { feed?: number } = {}): Promise<void> {

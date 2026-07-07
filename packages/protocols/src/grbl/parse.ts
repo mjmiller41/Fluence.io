@@ -13,6 +13,7 @@ export const REALTIME = {
   HOLD: 0x21, // '!'  feed-hold
   RESUME: 0x7e, // '~'  cycle-start/resume
   RESET: 0x18, // Ctrl-X soft reset
+  JOG_CANCEL: 0x85, // cancel an in-progress jog (GRBL 1.1)
 } as const;
 
 export type GrblResponse =
