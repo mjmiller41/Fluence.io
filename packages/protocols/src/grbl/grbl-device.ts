@@ -207,11 +207,14 @@ export class GrblDevice implements Device {
     await this.send(new Uint8Array([REALTIME.JOG_CANCEL]));
   }
 
-  async frame(bounds: Bounds, opts: { feed?: number } = {}): Promise<void> {
+  /**
+   * Trace the bounding box (M3-T05). With no `power` it is a laser-off G0 rapid
+   * frame for positioning; with `power` it runs a visible low-power outline
+   * (`M3 S<power>` … `M5`) at `feed`. Corners go min→max and back to the start.
+   */
+  async frame(bounds: Bounds, opts: { feed?: number; power?: number } = {}): Promise<void> {
     this.ensureConnected();
     if (this.running) throw new Error('Cannot frame while a job is streaming');
-    // Basic outline trace; refined (units/feed/laser-off) in M3-T05.
-    const feed = opts.feed ?? 3000;
     const { min, max } = bounds;
     const corners: Array<[number, number]> = [
       [min.x, min.y],
@@ -221,8 +224,19 @@ export class GrblDevice implements Device {
       [min.x, min.y],
     ];
     await this.send(this.line('G90'));
-    for (const [x, y] of corners) {
-      await this.send(this.line(`G1 X${x.toFixed(3)} Y${y.toFixed(3)} F${feed}`));
+    if (opts.power != null) {
+      const feed = opts.feed ?? 3000;
+      await this.send(this.line(`G0 X${min.x.toFixed(3)} Y${min.y.toFixed(3)}`));
+      await this.send(this.line(`M3 S${opts.power}`));
+      for (const [x, y] of corners.slice(1)) {
+        await this.send(this.line(`G1 X${x.toFixed(3)} Y${y.toFixed(3)} F${feed}`));
+      }
+      await this.send(this.line('M5'));
+    } else {
+      // Positioning frame: rapids with the laser off (no S word).
+      for (const [x, y] of corners) {
+        await this.send(this.line(`G0 X${x.toFixed(3)} Y${y.toFixed(3)}`));
+      }
     }
   }
 
@@ -230,6 +244,13 @@ export class GrblDevice implements Device {
     this.ensureConnected();
     if (this.running) throw new Error('Cannot home while a job is streaming');
     await this.send(this.line('$H'));
+  }
+
+  /** Set the current position as the work-coordinate origin (G10 L20 P0). */
+  async setWorkOrigin(): Promise<void> {
+    this.ensureConnected();
+    if (this.running) throw new Error('Cannot set origin while a job is streaming');
+    await this.send(this.line('G10 L20 P0 X0 Y0'));
   }
 
   async hold(): Promise<void> {
