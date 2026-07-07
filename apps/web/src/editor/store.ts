@@ -28,8 +28,10 @@ import {
   setSegmentType,
   setSubpathClosed,
   type Shape,
+  shapeBounds,
   type ShapeId,
   toEditablePath,
+  translatedShape,
   updateLayerCommand,
   updateShapeCommand,
 } from 'scene';
@@ -188,6 +190,12 @@ export interface EditorState {
   importDocument(imported: Document): void;
   /** Import a file by name + contents (string for SVG/DXF, bytes for PNG/JPEG); throws if unsupported. */
   importFile(name: string, data: string | Uint8Array): Promise<void>;
+  /** Bake `text` in the given font to vector paths and insert it, centred (undoable). */
+  addText(
+    text: string,
+    fontBytes: ArrayBuffer | Uint8Array,
+    opts: { size: number; letterSpacing?: number; lineHeight?: number },
+  ): Promise<void>;
   saveProject(): Promise<void>;
   openProject(): Promise<void>;
 
@@ -555,6 +563,19 @@ export const useEditor = create<EditorState>((set, get) => ({
       throw new Error('AI/PDF import is not supported yet (tracked as M1-T08b).');
     }
     throw new Error(`Unsupported file type: ${name}`);
+  },
+
+  addText: async (text, fontBytes, opts) => {
+    if (!text.trim()) return;
+    const { parseFont, textToPathShape } = await import('fileformats');
+    const font = parseFont(fontBytes);
+    const baked = textToPathShape(font, text, opts, { layerId: get().activeLayerId });
+    const b = shapeBounds(baked);
+    const { doc } = get();
+    const shape = b
+      ? translatedShape(baked, doc.width / 2 - (b.x + b.width / 2), doc.height / 2 - (b.y + b.height / 2))
+      : baked;
+    get().insertShapes([shape]);
   },
 
   saveProject: async () => {

@@ -1,7 +1,29 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import opentype from 'opentype.js';
 import { App } from './App';
 import { useEditor } from './editor/store';
+
+/** A tiny self-contained font (glyph 'A' = 500×700 rectangle) for text tests. */
+function testFontBytes(): Uint8Array {
+  const notdef = new opentype.Glyph({ name: '.notdef', unicode: 0, advanceWidth: 1000, path: new opentype.Path() });
+  const p = new opentype.Path();
+  p.moveTo(0, 0);
+  p.lineTo(500, 0);
+  p.lineTo(500, 700);
+  p.lineTo(0, 700);
+  p.close();
+  const a = new opentype.Glyph({ name: 'A', unicode: 65, advanceWidth: 600, path: p });
+  const font = new opentype.Font({
+    familyName: 'Test',
+    styleName: 'Regular',
+    unitsPerEm: 1000,
+    ascender: 800,
+    descender: -200,
+    glyphs: [notdef, a],
+  });
+  return new Uint8Array(font.toArrayBuffer());
+}
 
 afterEach(() => cleanup());
 
@@ -171,6 +193,27 @@ describe('editor app', () => {
 
     fireEvent.click(screen.getByTestId('undo'));
     expect(useEditor.getState().doc.shapes.length).toBe(before);
+  });
+
+  it('bakes text to vector paths on the active layer, undoably (M1-T06)', async () => {
+    render(<App />);
+    const before = useEditor.getState().doc.shapes.length;
+    await useEditor.getState().addText('AA', testFontBytes(), { size: 20 });
+    const shapes = useEditor.getState().doc.shapes;
+    expect(shapes.length).toBe(before + 1);
+    const text = shapes[shapes.length - 1];
+    expect(text.kind).toBe('path');
+    if (text.kind === 'path') {
+      // Two 'A' rectangles → two closed subpaths.
+      expect(text.subpaths.length).toBe(2);
+      expect(text.subpaths.every((sp) => sp.closed)).toBe(true);
+    }
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().doc.shapes.length).toBe(before);
+
+    // Toolbar text controls are present.
+    expect(screen.getByTestId('add-text')).toBeTruthy();
+    expect(screen.getByTestId('load-font')).toBeTruthy();
   });
 
   it('saves the selection as art and re-inserts it with fresh ids', () => {

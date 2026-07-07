@@ -30,3 +30,4 @@ export {
   physicalSizeMm,
   toBase64,
 } from './import/raster';
+export { parseFont, type TextOptions, textToPathShape, textToSubPaths } from './text/text';

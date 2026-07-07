@@ -27,6 +27,51 @@ export function Toolbar() {
 
   const importRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const fontRef = useRef<HTMLInputElement>(null);
+  const fontBytesRef = useRef<Uint8Array | null>(null);
+  const [fontName, setFontName] = useState<string | null>(null);
+  const [textValue, setTextValue] = useState('Text');
+  const [textSize, setTextSize] = useState(20);
+
+  const loadFontFile = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    fontBytesRef.current = new Uint8Array(await file.arrayBuffer());
+    setFontName(file.name);
+  };
+
+  const onFontClick = async (): Promise<void> => {
+    // Prefer the Chromium Local Font Access API; fall back to a file picker.
+    const query = (globalThis as { queryLocalFonts?: () => Promise<Array<{ fullName?: string; blob(): Promise<Blob> }>> })
+      .queryLocalFonts;
+    if (typeof query === 'function') {
+      try {
+        const fonts = await query();
+        if (fonts.length > 0) {
+          fontBytesRef.current = new Uint8Array(await (await fonts[0].blob()).arrayBuffer());
+          setFontName(fonts[0].fullName ?? 'system font');
+          return;
+        }
+      } catch {
+        /* permission denied / unsupported → fall through to the file picker */
+      }
+    }
+    fontRef.current?.click();
+  };
+
+  const onAddText = async (): Promise<void> => {
+    if (!fontBytesRef.current) {
+      setImportError('Load a font first (Font button)');
+      return;
+    }
+    setImportError(null);
+    try {
+      await useEditor.getState().addText(textValue, fontBytesRef.current, { size: textSize });
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Text failed');
+    }
+  };
 
   const onImportChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
@@ -135,6 +180,40 @@ export function Toolbar() {
       </div>
 
       {tool === 'node' && <NodeEditGroup />}
+
+      <div className="toolbar__group">
+        <input
+          type="text"
+          value={textValue}
+          onChange={(e) => setTextValue(e.target.value)}
+          data-testid="text-input"
+          title="Text to engrave"
+          style={{ width: 80 }}
+        />
+        <input
+          type="number"
+          value={textSize}
+          min={1}
+          onChange={(e) => setTextSize(Number(e.target.value) || 1)}
+          data-testid="text-size"
+          title="Text size (mm)"
+          style={{ width: 48 }}
+        />
+        <button type="button" onClick={() => void onFontClick()} data-testid="load-font" title="Load a font">
+          Font{fontName ? ' ✓' : ''}
+        </button>
+        <button type="button" onClick={() => void onAddText()} data-testid="add-text" title="Add text as paths">
+          Text
+        </button>
+        <input
+          ref={fontRef}
+          type="file"
+          accept=".ttf,.otf"
+          onChange={(e) => void loadFontFile(e)}
+          data-testid="font-file"
+          style={{ display: 'none' }}
+        />
+      </div>
 
       <div className="toolbar__group">
         <button type="button" onClick={addExactRect} data-testid="add-rect">
