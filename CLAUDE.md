@@ -1,8 +1,5 @@
 # CLAUDE.md — LaserKerf
 
-## First Read
-@../CLAUDE.md
-
 > Auto-loaded by Claude Code. Keep this short, factual, and current — it is the source of truth for HOW to work in this repo. The executable task backlog is `docs/03-implementation-plan.md`; the "why" is `docs/01-feasibility-study.md` + `docs/02-development-plan.md`.
 
 ## Project
