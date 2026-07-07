@@ -3,8 +3,10 @@ import type { Document } from 'scene';
 
 /**
  * `.laserkerf` — the open, versioned project format: a zip of a JSON document
- * (`document.json`) plus assets (rasters, added in M1-T09). Versioned from day
- * one with a migration hook so older files keep opening (development-plan §1.2).
+ * (`document.json`). Raster images (M1-T09) are stored inline on the image shape
+ * as a data URL, so they round-trip through the JSON; a future revision may split
+ * large rasters into separate zip assets. Versioned from day one with a migration
+ * hook so older files keep opening (development-plan §1.2).
  */
 export const LASERKERF_FORMAT_VERSION = 1;
 

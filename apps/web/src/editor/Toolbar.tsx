@@ -34,7 +34,9 @@ export function Toolbar() {
     if (!file) return;
     setImportError(null);
     try {
-      await useEditor.getState().importFile(file.name, await file.text());
+      const isRaster = /\.(png|jpe?g)$/i.test(file.name);
+      const data = isRaster ? new Uint8Array(await file.arrayBuffer()) : await file.text();
+      await useEditor.getState().importFile(file.name, data);
     } catch (err) {
       setImportError(err instanceof Error ? err.message : 'Import failed');
     }
@@ -97,7 +99,7 @@ export function Toolbar() {
         <input
           ref={importRef}
           type="file"
-          accept=".svg,.dxf,.ai,.pdf"
+          accept=".svg,.dxf,.png,.jpg,.jpeg,.ai,.pdf"
           onChange={(e) => void onImportChange(e)}
           data-testid="import-file"
           style={{ display: 'none' }}

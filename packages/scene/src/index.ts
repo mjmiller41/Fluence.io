@@ -41,6 +41,7 @@ export type {
   RegularPolygonShape,
   PolylineShape,
   PathShape,
+  ImageShape,
   GroupShape,
 } from './model/shape';
 export { isClosed, localPath, reassignIds, shapeBounds, shapeGeometry } from './model/shape';
@@ -95,6 +96,7 @@ export type { ShapeInit } from './model/factory';
 export {
   createEllipse,
   createGroup,
+  createImage,
   createPath,
   createPolygon,
   createPolyline,

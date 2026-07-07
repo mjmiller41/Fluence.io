@@ -66,12 +66,28 @@ export interface GroupShape extends CommonShape {
   children: Shape[];
 }
 
+/**
+ * A placed raster image. Local origin is the bottom-left corner; `width`/`height`
+ * are its physical size in mm (derived from the source pixels and DPI on import).
+ * `src` is a data URL; `pxWidth`/`pxHeight` are the intrinsic pixel dimensions.
+ * Pixels are rendered/engraved in M6; until then it draws as its bounds box.
+ */
+export interface ImageShape extends CommonShape {
+  kind: 'image';
+  width: number;
+  height: number;
+  src: string;
+  pxWidth: number;
+  pxHeight: number;
+}
+
 export type Shape =
   | RectShape
   | EllipseShape
   | RegularPolygonShape
   | PolylineShape
   | PathShape
+  | ImageShape
   | GroupShape;
 
 const ID_PREFIX: Record<Shape['kind'], string> = {
@@ -80,6 +96,7 @@ const ID_PREFIX: Record<Shape['kind'], string> = {
   polygon: 'poly',
   polyline: 'line',
   path: 'path',
+  image: 'img',
   group: 'grp',
 };
 
@@ -183,6 +200,19 @@ export function localPath(shape: Shape): Path {
       return [subpathFromPoints(shape.points, shape.closed)];
     case 'path':
       return shape.subpaths;
+    case 'image':
+      // Placeholder outline (bottom-left origin) until raster rendering lands (M6).
+      return [
+        subpathFromPoints(
+          [
+            { x: 0, y: 0 },
+            { x: shape.width, y: 0 },
+            { x: shape.width, y: shape.height },
+            { x: 0, y: shape.height },
+          ],
+          true,
+        ),
+      ];
     case 'group':
       return [];
   }
@@ -213,6 +243,8 @@ export function isClosed(shape: Shape): boolean {
       return shape.closed;
     case 'path':
       return shape.subpaths.every((sp) => sp.closed);
+    case 'image':
+      return true;
     case 'group':
       return shape.children.every(isClosed);
   }

@@ -5,6 +5,7 @@ import { nextId } from './ids';
 import type {
   EllipseShape,
   GroupShape,
+  ImageShape,
   LayerId,
   PathShape,
   PolylineShape,
@@ -90,6 +91,29 @@ export function createPath(subpaths: SubPath[], init: ShapeInit): PathShape {
     name: init.name,
     transform: baseTransform(init),
     subpaths,
+  };
+}
+
+/** A placed raster image at a given physical size (mm), origin bottom-left. */
+export function createImage(
+  src: string,
+  pxWidth: number,
+  pxHeight: number,
+  widthMm: number,
+  heightMm: number,
+  init: ShapeInit,
+): ImageShape {
+  return {
+    kind: 'image',
+    id: nextId('img'),
+    layerId: init.layerId,
+    name: init.name,
+    transform: baseTransform(init),
+    src,
+    pxWidth,
+    pxHeight,
+    width: widthMm,
+    height: heightMm,
   };
 }
 

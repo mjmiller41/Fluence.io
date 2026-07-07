@@ -8,6 +8,7 @@ import {
   type Command,
   composite,
   createDocument,
+  createImage,
   createLayer,
   deleteNode,
   type Document,
@@ -185,8 +186,8 @@ export interface EditorState {
   loadDocument(doc: Document): void;
   /** Merge a parsed document's layers + shapes into the current doc (undoable). */
   importDocument(imported: Document): void;
-  /** Read a vector file (SVG/DXF) by name+text and import it; throws if unsupported. */
-  importFile(name: string, text: string): Promise<void>;
+  /** Import a file by name + contents (string for SVG/DXF, bytes for PNG/JPEG); throws if unsupported. */
+  importFile(name: string, data: string | Uint8Array): Promise<void>;
   saveProject(): Promise<void>;
   openProject(): Promise<void>;
 
@@ -528,18 +529,32 @@ export const useEditor = create<EditorState>((set, get) => ({
     set((s) => ({ selection: imported.shapes.map((sh) => sh.id), version: s.version + 1 }));
   },
 
-  importFile: async (name, text) => {
+  importFile: async (name, data) => {
     const lower = name.toLowerCase();
-    const { importSvg, importDxf } = await import('fileformats');
-    if (lower.endsWith('.svg')) {
-      get().importDocument(importSvg(text));
-    } else if (lower.endsWith('.dxf')) {
-      get().importDocument(importDxf(text).document);
-    } else if (lower.endsWith('.ai') || lower.endsWith('.pdf')) {
-      throw new Error('AI/PDF import is not supported yet (tracked as M1-T08b).');
-    } else {
-      throw new Error(`Unsupported file type: ${name}`);
+    if (lower.endsWith('.svg') || lower.endsWith('.dxf')) {
+      const text = typeof data === 'string' ? data : new TextDecoder().decode(data);
+      const { importSvg, importDxf } = await import('fileformats');
+      get().importDocument(lower.endsWith('.svg') ? importSvg(text) : importDxf(text).document);
+      return;
     }
+    if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+      const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+      const { imageInfo, physicalSizeMm, dataUrl, mimeForName } = await import('fileformats');
+      const info = imageInfo(bytes);
+      const { widthMm, heightMm } = physicalSizeMm(info);
+      const { doc, activeLayerId } = get();
+      const at = { x: doc.width / 2 - widthMm / 2, y: doc.height / 2 - heightMm / 2 };
+      const img = createImage(dataUrl(bytes, mimeForName(name)), info.width, info.height, widthMm, heightMm, {
+        layerId: activeLayerId,
+        at,
+      });
+      get().insertShapes([img]);
+      return;
+    }
+    if (lower.endsWith('.ai') || lower.endsWith('.pdf')) {
+      throw new Error('AI/PDF import is not supported yet (tracked as M1-T08b).');
+    }
+    throw new Error(`Unsupported file type: ${name}`);
   },
 
   saveProject: async () => {

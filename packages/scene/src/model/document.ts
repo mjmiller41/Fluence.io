@@ -166,10 +166,15 @@ export function forEachLeaf(
   walk(doc.shapes, identity());
 }
 
-/** Document-space geometry of every leaf, tagged with its layer. */
+/**
+ * Document-space geometry of every leaf, tagged with its layer. Raster images
+ * are skipped: they carry no vector toolpath (their `localPath` is only a
+ * placeholder outline for display); raster engraving lands in M6.
+ */
 export function leafGeometries(doc: Document): Array<{ layerId: LayerId; path: Path }> {
   const out: Array<{ layerId: LayerId; path: Path }> = [];
   forEachLeaf(doc, (shape, world) => {
+    if (shape.kind === 'image') return;
     out.push({ layerId: shape.layerId, path: transformPath(localPath(shape), world) });
   });
   return out;

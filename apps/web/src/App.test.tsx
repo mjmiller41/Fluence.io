@@ -142,6 +142,37 @@ describe('editor app', () => {
     await expect(useEditor.getState().importFile('art.pdf', '%PDF-1.4')).rejects.toThrow(/not supported/i);
   });
 
+  it('imports a raster (PNG) at its physical size (M1-T09)', async () => {
+    render(<App />);
+    const before = useEditor.getState().doc.shapes.length;
+    // Minimal PNG: signature + IHDR (300x150) + pHYs (300 dpi) + IEND.
+    const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    const bytes = new Uint8Array(8 + 25 + 21 + 12);
+    bytes.set(sig, 0);
+    const dv = new DataView(bytes.buffer);
+    dv.setUint32(8, 13); // IHDR length
+    'IHDR'.split('').forEach((c, i) => (bytes[12 + i] = c.charCodeAt(0)));
+    dv.setUint32(16, 300); // width
+    dv.setUint32(20, 150); // height
+    dv.setUint32(33, 9); // pHYs length
+    'pHYs'.split('').forEach((c, i) => (bytes[37 + i] = c.charCodeAt(0)));
+    dv.setUint32(41, 11811); // ppuX ≈ 300 dpi
+    bytes[49] = 1; // unit = metre
+
+    await useEditor.getState().importFile('photo.png', bytes);
+    const shapes = useEditor.getState().doc.shapes;
+    expect(shapes.length).toBe(before + 1);
+    const img = shapes[shapes.length - 1];
+    expect(img.kind).toBe('image');
+    if (img.kind === 'image') {
+      expect(img.width).toBeCloseTo(25.4, 3); // 300px / 300dpi = 1in = 25.4mm
+      expect(img.height).toBeCloseTo(12.7, 3);
+    }
+
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().doc.shapes.length).toBe(before);
+  });
+
   it('saves the selection as art and re-inserts it with fresh ids', () => {
     render(<App />);
     // Add a rect — it becomes the current selection.
