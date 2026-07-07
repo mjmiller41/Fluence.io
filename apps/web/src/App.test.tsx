@@ -126,6 +126,22 @@ describe('editor app', () => {
     expect(useEditor.getState().nodeEditId).toBeNull();
   });
 
+  it('imports an SVG into the current document, undoably (M1-T08)', async () => {
+    render(<App />);
+    const before = useEditor.getState().doc.shapes.length;
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="50mm" height="50mm" viewBox="0 0 50 50">' +
+      '<rect x="0" y="0" width="50" height="50" stroke="#ff0000" fill="none"/></svg>';
+    await useEditor.getState().importFile('drawing.svg', svg);
+    expect(useEditor.getState().doc.shapes.length).toBe(before + 1);
+
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().doc.shapes.length).toBe(before);
+
+    // AI/PDF are not supported yet and reject with a clear message.
+    await expect(useEditor.getState().importFile('art.pdf', '%PDF-1.4')).rejects.toThrow(/not supported/i);
+  });
+
   it('saves the selection as art and re-inserts it with fresh ids', () => {
     render(<App />);
     // Add a rect — it becomes the current selection.

@@ -20,3 +20,5 @@ export {
   type MachineConfig,
 } from './gcode/gcode';
 export { simulate, type Simulation, type SimSegment } from './gcode/simulate';
+export { importSvg } from './import/svg';
+export { importDxf, type DxfImport } from './import/dxf';

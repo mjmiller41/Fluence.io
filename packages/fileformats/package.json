@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "fake-indexeddb": "^6.2.5",
-    "golden": "workspace:*"
+    "golden": "workspace:*",
+    "jsdom": "^29.1.1"
   }
 }

@@ -183,6 +183,10 @@ export interface EditorState {
   toggleGcodePreview(): void;
 
   loadDocument(doc: Document): void;
+  /** Merge a parsed document's layers + shapes into the current doc (undoable). */
+  importDocument(imported: Document): void;
+  /** Read a vector file (SVG/DXF) by name+text and import it; throws if unsupported. */
+  importFile(name: string, text: string): Promise<void>;
   saveProject(): Promise<void>;
   openProject(): Promise<void>;
 
@@ -512,6 +516,31 @@ export const useEditor = create<EditorState>((set, get) => ({
       gcode: null,
       version: s.version + 1,
     })),
+
+  importDocument: (imported) => {
+    if (imported.shapes.length === 0) return;
+    const { doc, history } = get();
+    const cmds: Command[] = [
+      ...imported.layers.map((l) => addLayerCommand(doc, l)),
+      ...imported.shapes.map((s) => addShapeCommand(doc, s)),
+    ];
+    history.execute(composite('Import', cmds));
+    set((s) => ({ selection: imported.shapes.map((sh) => sh.id), version: s.version + 1 }));
+  },
+
+  importFile: async (name, text) => {
+    const lower = name.toLowerCase();
+    const { importSvg, importDxf } = await import('fileformats');
+    if (lower.endsWith('.svg')) {
+      get().importDocument(importSvg(text));
+    } else if (lower.endsWith('.dxf')) {
+      get().importDocument(importDxf(text).document);
+    } else if (lower.endsWith('.ai') || lower.endsWith('.pdf')) {
+      throw new Error('AI/PDF import is not supported yet (tracked as M1-T08b).');
+    } else {
+      throw new Error(`Unsupported file type: ${name}`);
+    }
+  },
 
   saveProject: async () => {
     const { ProjectStore, serializeLaserKerf } = await import('fileformats');

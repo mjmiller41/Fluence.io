@@ -1,3 +1,4 @@
+import { type ChangeEvent, useRef, useState } from 'react';
 import { align, type AlignMode, createRect, distribute, type DistributeMode } from 'scene';
 import { type Tool, useEditor } from './store';
 
@@ -23,6 +24,21 @@ export function Toolbar() {
   const setTool = useEditor((s) => s.setTool);
   const shapeCount = useEditor.getState().doc.shapes.length;
   void version; // re-render on document changes so the count stays fresh
+
+  const importRef = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const onImportChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-importing the same file
+    if (!file) return;
+    setImportError(null);
+    try {
+      await useEditor.getState().importFile(file.name, await file.text());
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Import failed');
+    }
+  };
 
   const applyAlign = (mode: AlignMode): void => {
     const store = useEditor.getState();
@@ -75,6 +91,22 @@ export function Toolbar() {
         <button type="button" onClick={() => void store.openProject()} data-testid="open-project">
           Open
         </button>
+        <button type="button" onClick={() => importRef.current?.click()} data-testid="import-btn" title="Import SVG/DXF">
+          Import
+        </button>
+        <input
+          ref={importRef}
+          type="file"
+          accept=".svg,.dxf,.ai,.pdf"
+          onChange={(e) => void onImportChange(e)}
+          data-testid="import-file"
+          style={{ display: 'none' }}
+        />
+        {importError && (
+          <span className="toolbar__error" data-testid="import-error" role="alert" title={importError}>
+            ⚠ {importError}
+          </span>
+        )}
       </div>
 
       <div className="toolbar__group">
