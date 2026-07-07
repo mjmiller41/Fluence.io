@@ -195,6 +195,22 @@ describe('editor app', () => {
     expect(useEditor.getState().doc.shapes.length).toBe(before);
   });
 
+  it('imports a LightBurn .lbrn2 into the document, undoably (M1-T10)', async () => {
+    render(<App />);
+    const before = useEditor.getState().doc.shapes.length;
+    const lbrn =
+      '<?xml version="1.0"?><LightBurnProject FormatVersion="1">' +
+      '<CutSetting type="Cut"><index Value="0"/><name Value="Cut"/></CutSetting>' +
+      '<Shape Type="Rect" CutIndex="0" W="40" H="20" Cr="0"><XForm>1 0 0 1 100 100</XForm></Shape>' +
+      '</LightBurnProject>';
+    await useEditor.getState().importFile('design.lbrn2', lbrn);
+    expect(useEditor.getState().doc.shapes.length).toBe(before + 1);
+    expect(useEditor.getState().doc.shapes[before].kind).toBe('rect');
+
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().doc.shapes.length).toBe(before);
+  });
+
   it('bakes text to vector paths on the active layer, undoably (M1-T06)', async () => {
     render(<App />);
     const before = useEditor.getState().doc.shapes.length;

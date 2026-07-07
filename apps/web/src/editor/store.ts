@@ -539,10 +539,14 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   importFile: async (name, data) => {
     const lower = name.toLowerCase();
-    if (lower.endsWith('.svg') || lower.endsWith('.dxf')) {
+    const isVector =
+      lower.endsWith('.svg') || lower.endsWith('.dxf') || lower.endsWith('.lbrn') || lower.endsWith('.lbrn2');
+    if (isVector) {
       const text = typeof data === 'string' ? data : new TextDecoder().decode(data);
-      const { importSvg, importDxf } = await import('fileformats');
-      get().importDocument(lower.endsWith('.svg') ? importSvg(text) : importDxf(text).document);
+      const { importSvg, importDxf, importLbrn } = await import('fileformats');
+      if (lower.endsWith('.svg')) get().importDocument(importSvg(text));
+      else if (lower.endsWith('.dxf')) get().importDocument(importDxf(text).document);
+      else get().importDocument(importLbrn(text).document);
       return;
     }
     if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {

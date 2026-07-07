@@ -144,7 +144,7 @@ export function Toolbar() {
         <input
           ref={importRef}
           type="file"
-          accept=".svg,.dxf,.png,.jpg,.jpeg,.ai,.pdf"
+          accept=".svg,.dxf,.lbrn,.lbrn2,.png,.jpg,.jpeg,.ai,.pdf"
           onChange={(e) => void onImportChange(e)}
           data-testid="import-file"
           style={{ display: 'none' }}

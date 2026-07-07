@@ -22,6 +22,7 @@ export {
 export { simulate, type Simulation, type SimSegment } from './gcode/simulate';
 export { importSvg } from './import/svg';
 export { importDxf, type DxfImport } from './import/dxf';
+export { importLbrn, type LbrnImport } from './import/lbrn';
 export {
   dataUrl,
   imageInfo,
