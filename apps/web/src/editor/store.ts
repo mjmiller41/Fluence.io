@@ -9,19 +9,26 @@ import {
   composite,
   createDocument,
   createLayer,
+  deleteNode,
   type Document,
   emptyArtLibrary,
   findShape,
   getArtItem,
   History,
+  insertNode,
   type Layer,
   type LayerId,
+  type NodeRef,
+  type PathShape,
   reassignIds,
   removeArtItem,
   removeShapeCommand,
   replaceShape,
+  setSegmentType,
+  setSubpathClosed,
   type Shape,
   type ShapeId,
+  toEditablePath,
   updateLayerCommand,
   updateShapeCommand,
 } from 'scene';
@@ -39,7 +46,7 @@ import {
 } from 'cam';
 import type { MachineConfig, MachineOrigin, Simulation } from 'fileformats';
 
-export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon';
+export type Tool = 'select' | 'rect' | 'ellipse' | 'polygon' | 'node';
 
 /**
  * Persist the material library to OPFS (lazy-loads the fileformats codec bundle).
@@ -93,6 +100,10 @@ export interface EditorState {
   selection: ShapeId[];
   activeLayerId: LayerId;
   tool: Tool;
+  /** Shape currently open in the node editor (M1-T03), or null. Always a path. */
+  nodeEditId: ShapeId | null;
+  /** The node selected within the node editor, addressed within the edited path. */
+  nodeSel: NodeRef | null;
   /** Bumped whenever the (mutable) document changes so views re-render/redraw. */
   version: number;
 
@@ -126,6 +137,18 @@ export interface EditorState {
   deleteSelection(): void;
   selectedShapes(): Shape[];
   booleanAction(mode: BooleanMode): Promise<void>;
+
+  /** Enter node-edit on the first selected shape, converting it to a path if needed. */
+  enterNodeEdit(): void;
+  exitNodeEdit(): void;
+  setNodeSel(ref: NodeRef | null): void;
+  /** The path currently under the node editor, or null. */
+  nodeEditPath(): PathShape | null;
+  deleteNodeAction(ref: NodeRef): void;
+  insertNodeAction(subpath: number, segmentIndex: number, t?: number): void;
+  /** Flip the segment leaving/at the given edge between line and curve. */
+  toggleSegmentType(subpath: number, segmentIndex: number): void;
+  toggleSubpathClosed(subpath: number): void;
 
   addLayerAction(): void;
   updateLayer(id: LayerId, patch: Partial<Omit<Layer, 'id'>>): void;
@@ -177,6 +200,8 @@ export const useEditor = create<EditorState>((set, get) => ({
   selection: [],
   activeLayerId: initialDoc.layers[0].id,
   tool: 'select',
+  nodeEditId: null,
+  nodeSel: null,
   version: 0,
 
   cutSettingsByLayer: {},
@@ -253,6 +278,58 @@ export const useEditor = create<EditorState>((set, get) => ({
       ]),
     );
     set((s) => ({ selection: [result.id], version: s.version + 1 }));
+  },
+
+  enterNodeEdit: () => {
+    const shape = get().selectedShapes()[0];
+    if (!shape || shape.kind === 'group') return;
+    if (shape.kind !== 'path') {
+      const path = toEditablePath(shape);
+      if (!path) return;
+      get().applyUpdates([shape], [path]);
+    }
+    set({ tool: 'node', nodeEditId: shape.id, nodeSel: null, selection: [shape.id] });
+  },
+
+  exitNodeEdit: () => set({ tool: 'select', nodeEditId: null, nodeSel: null }),
+
+  setNodeSel: (ref) => set({ nodeSel: ref }),
+
+  nodeEditPath: () => {
+    const id = get().nodeEditId;
+    if (!id) return null;
+    const shape = findShape(get().doc, id);
+    return shape && shape.kind === 'path' ? shape : null;
+  },
+
+  deleteNodeAction: (ref) => {
+    const before = get().nodeEditPath();
+    if (!before) return;
+    get().applyUpdates([before], [deleteNode(before, ref)]);
+    set({ nodeSel: null });
+  },
+
+  insertNodeAction: (subpath, segmentIndex, t) => {
+    const before = get().nodeEditPath();
+    if (!before) return;
+    get().applyUpdates([before], [insertNode(before, subpath, segmentIndex, t)]);
+  },
+
+  toggleSegmentType: (subpath, segmentIndex) => {
+    const before = get().nodeEditPath();
+    if (!before) return;
+    const cur = before.subpaths[subpath]?.segments[segmentIndex];
+    if (!cur) return;
+    const next = setSegmentType(before, subpath, segmentIndex, cur.type === 'cubic' ? 'line' : 'cubic');
+    get().applyUpdates([before], [next]);
+  },
+
+  toggleSubpathClosed: (subpath) => {
+    const before = get().nodeEditPath();
+    if (!before) return;
+    const sp = before.subpaths[subpath];
+    if (!sp) return;
+    get().applyUpdates([before], [setSubpathClosed(before, subpath, !sp.closed)]);
   },
 
   addLayerAction: () => {
@@ -428,6 +505,9 @@ export const useEditor = create<EditorState>((set, get) => ({
       history: new History(),
       selection: [],
       activeLayerId: doc.layers[0].id,
+      tool: 'select',
+      nodeEditId: null,
+      nodeSel: null,
       cutSettingsByLayer: {},
       gcode: null,
       version: s.version + 1,

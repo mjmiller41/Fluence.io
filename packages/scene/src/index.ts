@@ -74,6 +74,19 @@ export {
   replaceShape,
 } from './model/document';
 export { rotatedShape, scaledShape, translatedShape } from './model/transform';
+export type { NodeRef, HandleSide } from './model/nodeedit';
+export {
+  deleteNode,
+  insertNode,
+  moveHandle,
+  moveNode,
+  nodeCount,
+  nodePosition,
+  setSegmentType,
+  setSubpathClosed,
+  subpathNodes,
+  toEditablePath,
+} from './model/nodeedit';
 export type { AlignMode, DistributeMode } from './model/align';
 export { align, distribute } from './model/align';
 export type { SnapConfig, SnapResult } from './model/snapping';

@@ -82,6 +82,50 @@ describe('editor app', () => {
     expect(useEditor.getState().doc.shapes.length).toBe(before);
   });
 
+  it('node-edits a shape: enter converts to a path, ops are undoable (M1-T03)', () => {
+    render(<App />);
+    fireEvent.click(screen.getByTestId('add-rect'));
+    const rectId = useEditor.getState().selection[0];
+    expect(useEditor.getState().doc.shapes.find((s) => s.id === rectId)?.kind).toBe('rect');
+
+    // Enter node edit via the toolbar → the rect becomes a path (same id).
+    fireEvent.click(screen.getByTestId('tool-node'));
+    const st = useEditor.getState();
+    expect(st.tool).toBe('node');
+    expect(st.nodeEditId).toBe(rectId);
+    const path = st.nodeEditPath();
+    expect(path?.kind).toBe('path');
+    const nodeCountBefore = path!.subpaths[0].segments.length; // closed → nodeCount === segments
+    expect(nodeCountBefore).toBeGreaterThanOrEqual(4);
+
+    // Node-mode controls are present in the toolbar.
+    expect(screen.getByTestId('node-edit-group')).toBeTruthy();
+    expect(screen.getByTestId('node-delete')).toBeTruthy();
+
+    // Delete a node → one fewer node, undoable.
+    useEditor.getState().deleteNodeAction({ subpath: 0, node: 1 });
+    expect(useEditor.getState().nodeEditPath()!.subpaths[0].segments.length).toBe(nodeCountBefore - 1);
+    fireEvent.click(screen.getByTestId('undo'));
+    expect(useEditor.getState().nodeEditPath()!.subpaths[0].segments.length).toBe(nodeCountBefore);
+
+    // Convert segment 0 line ↔ curve.
+    const seg0Before = useEditor.getState().nodeEditPath()!.subpaths[0].segments[0].type;
+    useEditor.getState().toggleSegmentType(0, 0);
+    expect(useEditor.getState().nodeEditPath()!.subpaths[0].segments[0].type).not.toBe(seg0Before);
+
+    // Insert a node on segment 0 → one more node.
+    const preInsert = useEditor.getState().nodeEditPath()!.subpaths[0].segments.length;
+    useEditor.getState().insertNodeAction(0, 0, 0.5);
+    expect(useEditor.getState().nodeEditPath()!.subpaths[0].segments.length).toBe(preInsert + 1);
+
+    // Open the subpath, then exit via the toolbar.
+    useEditor.getState().toggleSubpathClosed(0);
+    expect(useEditor.getState().nodeEditPath()!.subpaths[0].closed).toBe(false);
+    fireEvent.click(screen.getByTestId('node-done'));
+    expect(useEditor.getState().tool).toBe('select');
+    expect(useEditor.getState().nodeEditId).toBeNull();
+  });
+
   it('saves the selection as art and re-inserts it with fresh ids', () => {
     render(<App />);
     // Add a rect — it becomes the current selection.
