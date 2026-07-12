@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LaserKerf.io · Design System</title>
+<!--
+  LaserKerf.io — Design System reference (self-contained; no network deps).
+
+  SOURCE OF TRUTH: apps/web/src/styles.css  (+ index.html, vite.config.ts manifest, icons/favicon.svg)
+  This file MIRRORS the real, shipped app styling. It is not a redesign.
+
+  REAL FONTS (system stacks — no web fonts loaded here, matching the app):
+    UI/body : system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif
+    Mono    : ui-monospace, monospace
+
+  The app is dark-only by design (styles.css: `color-scheme: dark`). This page
+  reflects that. Do NOT invent a light theme for LaserKerf artifacts.
+-->
+<style>
+  :root{
+    /* === Real tokens, verbatim from apps/web/src/styles.css :root === */
+    --bg:#0b0f14;
+    --panel:#131a22;
+    --border:#223040;
+    --text:#e6edf3;
+    --muted:#8b98a5;
+    --accent:#f0653a;
+
+    /* === Recurring literal values used across styles.css (not declared as vars,
+           but consistent enough to be de-facto tokens) === */
+    --surface:#1a2430;      /* button / input / control fill */
+    --toolbar:#0f151c;      /* toolbar strip */
+    --canvas:#0b0e13;       /* editor canvas / console bg */
+    --accent-ink:#1a0d06;   /* text on accent (active toolbar btn) */
+    --accent-ink2:#10151c;  /* text on accent (CAM generate) */
+    --ok:#3fb950;           /* online / success */
+    --warn:#f5b942;         /* stale / warning */
+    --err:#ff6b6b;          /* error */
+
+    /* radii observed in the app */
+    --r-sm:3px; --r-md:4px; --r-lg:5px; --r-xl:6px; --r-brand:12px; --r-pill:999px;
+
+    --mono:ui-monospace, monospace;
+    --sans:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);}
+  code,kbd{font-family:var(--mono);font-size:0.85em;}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1rem 5rem;}
+
+  /* ---- Masthead (mirrors .app-bar) ---- */
+  .masthead{
+    border-bottom:1px solid var(--border);
+    background:var(--panel);
+    padding:1.25rem 1rem;
+    margin-bottom:2rem;
+  }
+  .masthead__inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:0.9rem;flex-wrap:wrap;}
+  .logo{width:40px;height:40px;flex:0 0 auto;}
+  .masthead h1{margin:0;font-size:1.4rem;letter-spacing:-0.02em;font-weight:650;}
+  .masthead .sub{color:var(--muted);font-size:0.85rem;margin-top:0.15rem;}
+  .masthead__note{
+    flex:1 1 100%;
+    margin-top:0.6rem;
+    color:var(--muted);
+    font-size:0.85rem;
+    border-left:2px solid var(--accent);
+    padding-left:0.7rem;
+  }
+
+  section{margin:2.75rem 0;}
+  h2{
+    font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;
+    color:var(--muted);margin:0 0 0.25rem;
+  }
+  .sec-rule{height:1px;background:var(--border);border:0;margin:0.4rem 0 1.25rem;}
+  h3{font-size:1rem;font-weight:600;margin:1.5rem 0 0.6rem;letter-spacing:-0.01em;}
+  p.lede{color:var(--muted);font-size:0.9rem;margin:0 0 1.25rem;max-width:70ch;}
+
+  /* ---- Color swatches ---- */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;}
+  .swatch{
+    border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;background:var(--panel);
+  }
+  .swatch__chip{height:70px;}
+  .swatch__meta{padding:0.55rem 0.65rem;font-size:0.78rem;}
+  .swatch__name{font-weight:600;}
+  .swatch__hex{color:var(--muted);font-family:var(--mono);font-size:0.75rem;margin-top:0.15rem;}
+  .swatch__var{color:var(--muted);font-family:var(--mono);font-size:0.72rem;}
+  .swatch--ring{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
+
+  /* ---- Type samples ---- */
+  .type-row{
+    display:flex;align-items:baseline;gap:1rem;padding:0.6rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;
+  }
+  .type-row:last-child{border-bottom:0;}
+  .type-tag{flex:0 0 130px;color:var(--muted);font-family:var(--mono);font-size:0.72rem;}
+  .type-sample{flex:1 1 auto;min-width:0;}
+
+  /* ---- Token table ---- */
+  .tbl{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  .tbl th,.tbl td{text-align:left;padding:0.45rem 0.6rem;border-bottom:1px solid var(--border);}
+  .tbl th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:0.68rem;letter-spacing:0.06em;}
+  .tbl td code{color:var(--text);}
+  .radius-demo{display:inline-block;width:26px;height:26px;background:var(--surface);border:1px solid var(--border);vertical-align:middle;}
+
+  /* ---- Component demo scaffolding ---- */
+  .demo{
+    border:1px solid var(--border);border-radius:var(--r-xl);background:var(--panel);
+    padding:0;overflow:hidden;margin-bottom:1.25rem;
+  }
+  .demo__label{
+    font-size:0.7rem;color:var(--muted);font-family:var(--mono);
+    padding:0.4rem 0.75rem;border-bottom:1px solid var(--border);background:var(--toolbar);
+  }
+  .demo__body{padding:1rem;}
+
+  /* ===== The following classes replicate real app components verbatim ===== */
+
+  /* app-bar */
+  .app-bar{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border-bottom:1px solid var(--border);background:var(--panel);}
+  .app-bar h4{margin:0;font-size:1.15rem;letter-spacing:-0.02em;font-weight:600;}
+  .app-bar__milestone{color:var(--muted);font-size:0.85rem;}
+  .badge{margin-left:auto;padding:0.15rem 0.6rem;border-radius:var(--r-pill);font-size:0.78rem;font-weight:600;}
+  .badge--online{background:rgba(63,185,80,0.15);color:#3fb950;}
+  .badge--offline{background:rgba(240,101,58,0.15);color:var(--accent);}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.75rem;background:var(--toolbar);flex-wrap:wrap;}
+  .toolbar__group{display:flex;gap:0.25rem;padding-right:0.5rem;border-right:1px solid var(--border);}
+  .toolbar__spacer{flex:1;}
+  .toolbar__count{font-family:var(--mono);font-size:0.8rem;color:var(--muted);min-width:2ch;text-align:right;}
+  .toolbar button{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-xl);padding:0.35rem 0.6rem;font-size:0.82rem;cursor:pointer;}
+  .toolbar button:hover{border-color:var(--accent);}
+  .toolbar button.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+  .toolbar button:disabled{opacity:0.4;cursor:not-allowed;}
+
+  /* generic surface button (CAM generate = accent) */
+  .btn-surface{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-lg);padding:0.4rem 0.7rem;cursor:pointer;font:inherit;font-size:0.85rem;}
+  .btn-surface:hover{border-color:var(--accent);}
+  .btn-accent{background:var(--accent);color:var(--accent-ink2);border:none;border-radius:var(--r-lg);padding:0.45rem 0.9rem;font-weight:600;cursor:pointer;font:inherit;font-size:0.85rem;}
+  .btn-accent:disabled{opacity:0.5;cursor:progress;}
+
+  /* input / select */
+  .field-input{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-md);padding:0.25rem 0.4rem;font:inherit;font-size:0.85rem;}
+
+  /* layers list */
+  .layers{background:var(--panel);font-size:0.85rem;}
+  .layers__header{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);font-weight:600;}
+  .layers__header button{width:24px;height:24px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;}
+  .layers ul{list-style:none;margin:0;padding:0;}
+  .layers li{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.75rem;cursor:pointer;}
+  .layers li.active{background:var(--surface);}
+  .layers__swatch{width:14px;height:14px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,0.2);}
+  .layers__name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  /* CAM result stats + stale */
+  .cam__stat{display:flex;justify-content:space-between;padding:0.15rem 0;font-size:0.85rem;}
+  .cam__stat span:first-child{color:var(--muted);}
+  .cam__stale{margin:0.35rem 0;color:var(--warn);font-size:0.78rem;}
+
+  /* machine panel bits */
+  .tag{background:var(--accent);color:var(--bg);border-radius:var(--r-sm);padding:0 0.35rem;font-weight:600;font-size:0.75rem;}
+  .console{height:96px;overflow-y:auto;background:var(--canvas);border:1px solid var(--border);border-radius:var(--r-md);padding:0.25rem 0.4rem;font-family:var(--mono);font-size:0.75rem;white-space:pre-wrap;}
+  .console-line--tx{color:var(--accent);}
+  .console-line--rx{color:var(--muted);}
+  .console-dir{opacity:0.6;}
+  .machine-error{color:var(--err);font-size:0.8rem;}
+  .jogrow{display:flex;gap:0.25rem;margin-bottom:0.25rem;}
+  .jogrow button{width:40px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-md);padding:0.25rem;cursor:pointer;}
+
+  /* ===================== DECISION COMPONENT (restyled to LaserKerf) ===================== */
+  .decisions{display:flex;flex-direction:column;gap:1rem;border:1px solid var(--border);border-radius:var(--r-xl);background:var(--panel);padding:1.1rem;}
+  .decision{border:1px solid var(--border);border-radius:var(--r-lg);padding:0.85rem;background:var(--bg);}
+  .decision .q{margin:0 0 0.6rem;font-weight:600;font-size:0.95rem;}
+  .opts{display:flex;flex-direction:column;gap:0.4rem;}
+  .opt{display:flex;gap:0.55rem;align-items:flex-start;padding:0.4rem 0.55rem;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;background:var(--surface);transition:border-color .12s;}
+  .opt:hover{border-color:var(--accent);}
+  .opt input{accent-color:var(--accent);margin-top:0.2rem;flex:0 0 auto;}
+  .opt span{font-size:0.85rem;color:var(--text);}
+  .opt b{font-weight:650;}
+  .decisions textarea{
+    width:100%;background:var(--surface);color:var(--text);border:1px solid var(--border);
+    border-radius:var(--r-md);padding:0.5rem 0.6rem;font:inherit;font-size:0.85rem;resize:vertical;
+  }
+  .decisions textarea:focus,.field-input:focus,.opt:focus-within{outline:2px solid rgba(240,101,58,0.5);outline-offset:1px;}
+  .btn{
+    align-self:flex-start;background:var(--accent);color:var(--accent-ink2);border:none;
+    border-radius:var(--r-lg);padding:0.5rem 1rem;font-weight:600;cursor:pointer;font:inherit;font-size:0.88rem;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .toast{
+    display:inline-block;margin-left:0.6rem;color:var(--ok);font-size:0.82rem;font-weight:600;
+    opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+  #out-d1{width:100%;min-height:120px;margin-top:0.4rem;font-family:var(--mono);font-size:0.78rem;
+    background:var(--canvas);color:var(--muted);border:1px solid var(--border);border-radius:var(--r-md);padding:0.6rem;resize:vertical;}
+
+  .foot{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--border);color:var(--muted);font-size:0.8rem;}
+  .note-box{border:1px solid var(--border);border-left:3px solid var(--warn);background:rgba(245,185,66,0.06);
+    padding:0.75rem 0.9rem;border-radius:var(--r-md);font-size:0.85rem;color:var(--text);margin:1rem 0;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <svg class="logo" viewBox="0 0 64 64" role="img" aria-label="LaserKerf logo">
+      <rect width="64" height="64" rx="12" fill="#0b0f14" stroke="#223040"/>
+      <path d="M32 12 52 32 32 52 12 32 Z" fill="#f0653a" />
+    </svg>
+    <div>
+      <h1>LaserKerf.io · Design System</h1>
+      <div class="sub">House style, extracted from <code>apps/web/src/styles.css</code></div>
+    </div>
+    <p class="masthead__note">House style for LaserKerf.io — read this before generating HTML artifacts for this project. Dark, technical, engineering-tool aesthetic; a single orange accent (<code>#f0653a</code>) on near-black panels. Never a light theme.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="note-box">
+    <b>Fidelity note.</b> This captures the app's <em>actual</em> UI CSS. The styling is real but <b>utilitarian and moderately developed</b> — it's an editor/CAM tool chrome (app bar, toolbar, panels, machine console), not a marketing site. There is one accent color, no declared spacing/type scale variables, and radii/spacing are consistent literals rather than named tokens. Everything below is derived from shipped values; inferred groupings (surface/toolbar/canvas colors, radius scale) are labeled as such.
+  </div>
+
+  <!-- ============ COLOR ============ -->
+  <section>
+    <h2>Foundations — Color</h2>
+    <hr class="sec-rule"/>
+    <p class="lede">Six declared CSS variables in <code>:root</code>, plus recurring literal hex values that function as de-facto tokens. The app sets <code>color-scheme: dark</code> — it is dark-only by design.</p>
+
+    <h3>Declared tokens (<code>:root</code>)</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch__chip" style="background:#0b0f14"></div><div class="swatch__meta"><div class="swatch__name">Background</div><div class="swatch__hex">#0b0f14</div><div class="swatch__var">--bg</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#131a22"></div><div class="swatch__meta"><div class="swatch__name">Panel</div><div class="swatch__hex">#131a22</div><div class="swatch__var">--panel</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#223040"></div><div class="swatch__meta"><div class="swatch__name">Border</div><div class="swatch__hex">#223040</div><div class="swatch__var">--border</div></div></div>
+      <div class="swatch swatch--ring"><div class="swatch__chip" style="background:#e6edf3"></div><div class="swatch__meta"><div class="swatch__name">Text</div><div class="swatch__hex">#e6edf3</div><div class="swatch__var">--text</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#8b98a5"></div><div class="swatch__meta"><div class="swatch__name">Muted</div><div class="swatch__hex">#8b98a5</div><div class="swatch__var">--muted</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#f0653a"></div><div class="swatch__meta"><div class="swatch__name">Accent (brand)</div><div class="swatch__hex">#f0653a</div><div class="swatch__var">--accent</div></div></div>
+    </div>
+
+    <h3>De-facto tokens &amp; states (recurring literals)</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch__chip" style="background:#1a2430"></div><div class="swatch__meta"><div class="swatch__name">Surface / controls</div><div class="swatch__hex">#1a2430</div><div class="swatch__var">buttons, inputs</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#0f151c"></div><div class="swatch__meta"><div class="swatch__name">Toolbar</div><div class="swatch__hex">#0f151c</div><div class="swatch__var">toolbar strip</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#0b0e13"></div><div class="swatch__meta"><div class="swatch__name">Canvas / console</div><div class="swatch__hex">#0b0e13</div><div class="swatch__var">editor + console bg</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#3fb950"></div><div class="swatch__meta"><div class="swatch__name">Success / online</div><div class="swatch__hex">#3fb950</div><div class="swatch__var">badge--online</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#f5b942"></div><div class="swatch__meta"><div class="swatch__name">Warning / stale</div><div class="swatch__hex">#f5b942</div><div class="swatch__var">cam__stale</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#ff6b6b"></div><div class="swatch__meta"><div class="swatch__name">Error</div><div class="swatch__hex">#ff6b6b</div><div class="swatch__var">machine-panel__error</div></div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:#1a0d06"></div><div class="swatch__meta"><div class="swatch__name">Ink on accent</div><div class="swatch__hex">#1a0d06</div><div class="swatch__var">active toolbar text</div></div></div>
+    </div>
+  </section>
+
+  <!-- ============ TYPOGRAPHY ============ -->
+  <section>
+    <h2>Foundations — Typography</h2>
+    <hr class="sec-rule"/>
+    <p class="lede">System font stacks only (no web fonts — offline-first). UI copy uses the sans stack; numeric/console/monospace UI uses the mono stack. Headings tend toward <code>letter-spacing:-0.02em</code> and weight 600.</p>
+
+    <div class="demo"><div class="demo__label">font-family (sans): system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif</div><div class="demo__body">
+      <div class="type-row"><div class="type-tag">h1 · 1.15rem / -0.02em</div><div class="type-sample" style="font-size:1.15rem;letter-spacing:-0.02em;font-weight:600;">LaserKerf — offline laser design &amp; CAM</div></div>
+      <div class="type-row"><div class="type-tag">body · 1rem</div><div class="type-sample">Design, generate toolpaths, and drive a GRBL machine — fully offline.</div></div>
+      <div class="type-row"><div class="type-tag">panel · 0.85rem</div><div class="type-sample" style="font-size:0.85rem;">Layers, CAM stats, and machine panel copy sit at 0.85rem.</div></div>
+      <div class="type-row"><div class="type-tag">control · 0.82rem</div><div class="type-sample" style="font-size:0.82rem;">Toolbar buttons render at 0.82rem.</div></div>
+      <div class="type-row"><div class="type-tag">meta · 0.78rem</div><div class="type-sample" style="font-size:0.78rem;color:var(--muted);">Badges &amp; secondary labels, muted, 0.78rem.</div></div>
+      <div class="type-row"><div class="type-tag">micro · 0.75rem</div><div class="type-sample" style="font-size:0.75rem;color:var(--muted);">Tags, console lines, fine print.</div></div>
+    </div></div>
+
+    <div class="demo"><div class="demo__label">font-family (mono): ui-monospace, monospace</div><div class="demo__body">
+      <div class="type-row"><div class="type-tag">count · 0.8rem</div><div class="type-sample" style="font-family:var(--mono);font-size:0.8rem;color:var(--muted);">selected: 12</div></div>
+      <div class="type-row"><div class="type-tag">console · 0.75rem</div><div class="type-sample" style="font-family:var(--mono);font-size:0.75rem;"><span style="color:var(--accent)">&gt; G0 X10 Y10</span>&nbsp;&nbsp;<span style="color:var(--muted)">&lt; ok</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- ============ SPACING / RADIUS ============ -->
+  <section>
+    <h2>Foundations — Spacing &amp; Radius</h2>
+    <hr class="sec-rule"/>
+    <p class="lede">No named spacing/radius variables exist in the source; these are the consistent literal values used throughout <code>styles.css</code>. Spacing is rem-based on a loose 0.25rem rhythm.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+      <div>
+        <h3 style="margin-top:0;">Radius scale</h3>
+        <table class="tbl">
+          <tr><th>Preview</th><th>Value</th><th>Used for</th></tr>
+          <tr><td><span class="radius-demo" style="border-radius:3px"></span></td><td><code>3px</code></td><td>layer swatch, status tag</td></tr>
+          <tr><td><span class="radius-demo" style="border-radius:4px"></span></td><td><code>4px</code></td><td>inputs, small buttons</td></tr>
+          <tr><td><span class="radius-demo" style="border-radius:5px"></span></td><td><code>5px</code></td><td>primary/accent buttons</td></tr>
+          <tr><td><span class="radius-demo" style="border-radius:6px"></span></td><td><code>6px</code></td><td>toolbar buttons</td></tr>
+          <tr><td><span class="radius-demo" style="border-radius:12px"></span></td><td><code>12px</code></td><td>app/brand icon tile</td></tr>
+          <tr><td><span class="radius-demo" style="border-radius:999px;width:40px"></span></td><td><code>999px</code></td><td>pill badges</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="margin-top:0;">Spacing (padding / gap literals)</h3>
+        <table class="tbl">
+          <tr><th>Token</th><th>Typical use</th></tr>
+          <tr><td><code>0.25rem</code></td><td>tight gaps (button groups)</td></tr>
+          <tr><td><code>0.4rem</code></td><td>list-item / field padding</td></tr>
+          <tr><td><code>0.5rem</code></td><td>panel section gaps</td></tr>
+          <tr><td><code>0.6rem&ndash;0.75rem</code></td><td>bar &amp; panel horizontal padding</td></tr>
+          <tr><td><code>1rem</code></td><td>bar padding, section blocks</td></tr>
+        </table>
+        <p class="lede" style="margin-top:0.75rem;">Borders are uniformly <code>1px solid var(--border)</code>. Layout is CSS Grid (<code>app-shell</code>: rows auto/auto/1fr; <code>editor-body</code>: <code>1fr 220px</code>).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPONENTS ============ -->
+  <section>
+    <h2>Components — Live examples</h2>
+    <hr class="sec-rule"/>
+    <p class="lede">Rendered from the real component classes in <code>styles.css</code> using extracted values.</p>
+
+    <h3>App bar + status badge</h3>
+    <div class="demo"><div class="demo__label">.app-bar / .badge--online / .badge--offline</div>
+      <div class="app-bar"><h4>LaserKerf</h4><span class="app-bar__milestone">M3 · GRBL control</span><span class="badge badge--online">online</span></div>
+      <div class="app-bar" style="border-top:1px solid var(--border);border-bottom:0;"><h4>LaserKerf</h4><span class="app-bar__milestone">agent absent</span><span class="badge badge--offline">offline</span></div>
+    </div>
+
+    <h3>Toolbar</h3>
+    <div class="demo"><div class="demo__label">.toolbar / button / button.active / :disabled</div>
+      <div class="toolbar">
+        <div class="toolbar__group"><button class="active">Select</button><button>Line</button><button>Rect</button></div>
+        <div class="toolbar__group"><button>Node</button><button disabled>Weld</button></div>
+        <button>Group</button>
+        <span class="toolbar__spacer"></span>
+        <span class="toolbar__count">12</span>
+      </div>
+    </div>
+
+    <h3>Buttons</h3>
+    <div class="demo"><div class="demo__label">surface button · accent button (CAM "Generate") · disabled</div><div class="demo__body" style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn-surface">Import SVG</button>
+      <button class="btn-accent">Generate toolpaths</button>
+      <button class="btn-accent" disabled>Generating…</button>
+      <button class="btn-surface" style="opacity:.4;cursor:not-allowed;">Disabled</button>
+    </div></div>
+
+    <h3>Inputs &amp; selects</h3>
+    <div class="demo"><div class="demo__label">.cam__field select / input — dark surface fields</div><div class="demo__body" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.85rem;color:var(--muted)">Material
+        <select class="field-input"><option>Plywood 3mm</option><option>Acrylic 5mm</option></select></label>
+      <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.85rem;color:var(--muted)">Speed
+        <input class="field-input" style="width:90px" value="120" /></label>
+      <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.85rem;color:var(--muted)">Power
+        <input class="field-input" style="width:90px" value="85%" /></label>
+    </div></div>
+
+    <h3>Layers list</h3>
+    <div class="demo"><div class="demo__label">.layers — swatch + name, active row</div>
+      <div class="layers" style="max-width:340px;">
+        <div class="layers__header"><span>Layers</span><button>+</button></div>
+        <ul>
+          <li class="active"><span class="layers__swatch" style="background:#f0653a"></span><span class="layers__name">Cut — outline</span></li>
+          <li><span class="layers__swatch" style="background:#3fb950"></span><span class="layers__name">Engrave — fill</span></li>
+          <li><span class="layers__swatch" style="background:#8b98a5"></span><span class="layers__name">Score — reference</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>CAM result &amp; states</h3>
+    <div class="demo"><div class="demo__label">.cam__stat / .cam__stale (warning)</div><div class="demo__body" style="max-width:340px;">
+      <div class="cam__stat"><span>Cut length</span><span>1,284 mm</span></div>
+      <div class="cam__stat"><span>Est. time</span><span>04:12</span></div>
+      <div class="cam__stat"><span>Passes</span><span>2</span></div>
+      <div class="cam__stale">⚠ Toolpaths are stale — geometry changed since last generate.</div>
+    </div></div>
+
+    <h3>Machine console (M3)</h3>
+    <div class="demo"><div class="demo__label">.machine-panel__status .tag / console tx(accent)+rx(muted) / jog / error</div><div class="demo__body" style="display:flex;flex-direction:column;gap:0.6rem;max-width:420px;">
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;font-size:0.85rem;">Status <span class="tag">IDLE</span> <span style="color:var(--muted)">WPos 10.0, 10.0</span></div>
+      <div>
+        <div class="jogrow"><span style="width:40px"></span><button>Y+</button></div>
+        <div class="jogrow"><button>X−</button><button>⌂</button><button>X+</button></div>
+        <div class="jogrow"><span style="width:40px"></span><button>Y−</button></div>
+      </div>
+      <div class="console"><span class="console-line--tx"><span class="console-dir">&gt;</span> $H</span>
+<span class="console-line--rx"><span class="console-dir">&lt;</span> ok</span>
+<span class="console-line--tx"><span class="console-dir">&gt;</span> G0 X10 Y10</span>
+<span class="console-line--rx"><span class="console-dir">&lt;</span> ok</span></div>
+      <div class="machine-error">Port lost — reconnect the controller.</div>
+    </div></div>
+  </section>
+
+  <!-- ============ DECISION COMPONENT ============ -->
+  <section>
+    <h2>Interactive — Decision component</h2>
+    <hr class="sec-rule"/>
+    <p class="lede">Answer open design decisions on-page, then copy them back as markdown for Claude. Restyled to LaserKerf's palette; behavior is the shared pattern.</p>
+
+    <form class="decisions" id="d1">
+      <div class="decision" data-decision data-label="Artifact theme">
+        <p class="q">How should generated HTML artifacts for LaserKerf look?</p>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q1" value="Dark app-chrome (match the tool)"><span><b>Dark app-chrome</b> — mirror the editor: #0b0f14 bg, #f0653a accent</span></label>
+          <label class="opt"><input type="radio" name="q1" value="Dark marketing (looser)"><span><b>Dark marketing</b> — same palette, more whitespace &amp; larger type</span></label>
+          <label class="opt"><input type="radio" name="q1" value="Introduce a light theme"><span><b>Light theme</b> — deviates from the app (not recommended)</span></label>
+        </div>
+      </div>
+      <div class="decision" data-decision data-label="Accent usage">
+        <p class="q">How liberally should the orange accent be used?</p>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q2" value="Sparingly (primary actions only)"><span><b>Sparingly</b> — primary CTA / active state only, as in the app</span></label>
+          <label class="opt"><input type="radio" name="q2" value="Freely (headings, links, rules)"><span><b>Freely</b> — accent headings, links, dividers</span></label>
+        </div>
+      </div>
+      <div class="decision" data-decision data-label="Notes">
+        <textarea name="notes" rows="2" placeholder="Notes for Claude…"></textarea>
+      </div>
+      <button type="button" class="btn" onclick="copyDecisions('d1')">Copy my choices</button>
+      <span class="toast" id="toast-d1">✓ copied</span>
+      <textarea id="out-d1" readonly></textarea>
+    </form>
+  </section>
+
+  <footer class="foot">
+    LaserKerf.io Design System · extracted from <code>apps/web/src/styles.css</code>, <code>index.html</code>, <code>vite.config.ts</code>, and <code>public/icons/favicon.svg</code>. Self-contained: no external CSS, JS, fonts, or network requests. Dark-only, per <code>color-scheme: dark</code>. Not affiliated with LightBurn.
+  </footer>
+
+</div>
+
+<script>
+function copyDecisions(formId){
+  const form=document.getElementById(formId); let md="## Decisions\n";
+  form.querySelectorAll("[data-decision]").forEach(function(d){
+    const label=d.dataset.label||"";
+    const checks=[].slice.call(d.querySelectorAll("input:checked")).map(function(i){return i.value;});
+    const texts=[].slice.call(d.querySelectorAll("textarea,input[type=text]")).map(function(t){return t.value.trim();}).filter(Boolean);
+    md+="- **"+label+"**: "+([].concat(checks,texts).join(", ")||"(no answer)")+"\n";
+  });
+  const out=document.getElementById("out-"+formId); if(out)out.value=md;
+  if(navigator.clipboard)navigator.clipboard.writeText(md).catch(function(){});
+  const t=document.getElementById("toast-"+formId); if(t){t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2200);}
+}
+</script>
+</body>
+</html>

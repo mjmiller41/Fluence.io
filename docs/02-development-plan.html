@@ -32,61 +32,135 @@
     --sans:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
 
+  :root{--serif:"Charter","Iowan Old Style","Palatino Linotype",Palatino,Georgia,Cambria,serif}
   *{box-sizing:border-box}
-  html{scrollbar-width:thin;scrollbar-color:var(--line) var(--ink)}
-  ::-webkit-scrollbar{width:10px;height:10px}
+  html{scrollbar-width:thin;scrollbar-color:var(--line) var(--ink);scroll-behavior:smooth}
+  ::-webkit-scrollbar{width:11px;height:11px}
   ::-webkit-scrollbar-track{background:var(--ink)}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid var(--ink)}
-  html,body{margin:0;background:var(--ink);color:var(--text);
-    font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased}
-  body{background:radial-gradient(760px 300px at 50% -140px,rgba(227,165,82,.07),transparent 70%),var(--ink);
-    padding:26px 18px 80px;font-size:14.5px}
-  .wrap{max-width:800px;margin:0 auto}
-  .doc-mast{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-    border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px}
-  .doc-mast .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--faint)}
-  .doc-mast .eyebrow b{color:var(--brass)}
-  .doc-mast .src{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
-  main h1,main h2,main h3,main h4{font-weight:800;letter-spacing:-.01em;line-height:1.25;color:var(--text)}
-  main h1{font-size:26px;margin:.2em 0 .5em}
-  main h2{font-size:20px;margin:1.7em 0 .5em;border-top:1px solid var(--line);padding-top:.8em}
-  main h3{font-size:16px;margin:1.4em 0 .4em}
-  main h4{font-size:13px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-  main p{margin:.7em 0;color:var(--text)}
-  main a{color:var(--brass);text-decoration:none}
-  main a:hover{text-decoration:underline}
-  main strong{color:#fff}
-  main ul,main ol{margin:.6em 0;padding-left:1.4em}
-  main li{margin:.28em 0}
-  main li::marker{color:var(--faint)}
-  main code{font-family:var(--mono);font-size:.86em;color:#C9CEDF;background:var(--ink2);
-    padding:1px 5px;border-radius:4px}
-  main pre{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r-md);
-    padding:13px 15px;overflow:auto;line-height:1.5}
-  main pre code{background:none;padding:0;color:#C9CEDF;font-size:12px}
-  main blockquote{margin:1em 0;border-left:3px solid var(--brass-dim);background:var(--ink2);
-    border-radius:0 var(--r-md) var(--r-md) 0;padding:2px 16px;color:var(--muted)}
-  main table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13px;display:block;overflow-x:auto}
-  main th,main td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
-  main th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
-  main tr:hover td{background:var(--ink2)}
-  main hr{border:none;border-top:1px solid var(--line);margin:1.8em 0}
-  main img{max-width:100%;border-radius:var(--r-md)}
-  main input[type=checkbox]{accent-color:var(--brass);margin-right:6px}
-  .doc-foot{margin-top:44px;border-top:1px solid var(--line);padding-top:14px;
-    font-family:var(--mono);font-size:10px;color:var(--faint)}
+  ::-webkit-scrollbar-thumb:hover{background:var(--line2)}
+  html,body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans)}
+  body{font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 420px at 15% -260px,rgba(227,165,82,.12),transparent 60%),
+      radial-gradient(900px 500px at 100% -60px,rgba(124,140,224,.06),transparent 55%),
+      var(--ink);
+    padding:0 20px 96px}
+  ::selection{background:rgba(227,165,82,.28);color:#fff}
+
+  /* reading-progress rail */
+  #prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--brass-dim),var(--brass));
+    z-index:50;transition:width .08s linear}
+
+  .page{max-width:720px;margin:0 auto}
+
+  /* ---------------- hero ---------------- */
+  .hero{padding:66px 0 28px;border-bottom:1px solid var(--line);margin-bottom:8px;position:relative}
+  .kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--brass);margin-bottom:22px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--brass-dim)}
+  h1.title{font-size:clamp(31px,6.4vw,46px);line-height:1.04;font-weight:800;letter-spacing:-.022em;
+    margin:0 0 .5em;color:#fff;text-wrap:balance}
+  .standfirst{font-size:18.5px;line-height:1.58;color:var(--muted);font-weight:400;margin:0;max-width:58ch;
+    padding-left:16px;border-left:2px solid var(--brass-dim)}
+  .standfirst strong{color:var(--text);font-weight:600}
+  .hero .meta{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--faint);
+    display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .hero .meta .dot{color:var(--line2)}
+  .hero .meta .read{color:var(--brass-dim)}
+
+  /* ---------------- table of contents ---------------- */
+  .toc{margin:28px 0 8px;background:linear-gradient(180deg,var(--ink2),var(--surface));
+    border:1px solid var(--line);border-radius:var(--r-lg);padding:6px 18px 14px}
+  .toc>summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint);padding:12px 0 8px;display:flex;align-items:center;gap:9px}
+  .toc>summary::-webkit-details-marker{display:none}
+  .toc>summary::before{content:"▸";color:var(--brass);transition:transform .18s}
+  .toc[open]>summary::before{transform:rotate(90deg)}
+  .toc nav{display:flex;flex-direction:column;gap:1px;padding-top:4px}
+  .toc a{display:flex;gap:12px;text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 10px 6px 8px;
+    border-radius:6px;border-left:2px solid transparent;transition:color .12s,border-color .12s}
+  .toc a .n{font-family:var(--mono);font-size:11px;color:var(--faint);min-width:22px}
+  .toc a.lvl3{padding-left:33px;font-size:12.5px;color:var(--faint)}
+  .toc a:hover{color:var(--brass)}
+  .toc a.active{color:#fff;border-left-color:var(--brass);background:rgba(227,165,82,.06)}
+  .toc a.active .n{color:var(--brass)}
+
+  /* ---------------- article ---------------- */
+  main{padding-top:14px;counter-reset:sec}
+  main>*{max-width:68ch}
+  main p{margin:1.05em 0;color:#DDDBD2;font-family:var(--serif);font-size:16.5px;line-height:1.78}
+  main a{color:var(--brass);text-decoration:none;border-bottom:1px solid rgba(227,165,82,.35)}
+  main a:hover{border-bottom-color:var(--brass)}
+  main strong{color:#fff;font-weight:600}
+  main em{color:var(--text)}
+
+  main h2{counter-increment:sec;font-size:25px;font-weight:800;letter-spacing:-.015em;line-height:1.18;color:#fff;
+    margin:2.5em 0 .7em;padding-top:1.2em;border-top:1px solid var(--line)}
+  main h2::before{content:counter(sec,decimal-leading-zero);display:block;font-family:var(--mono);
+    font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--brass);margin-bottom:.7em}
+  main h3{font-size:18px;font-weight:700;color:var(--text);margin:2em 0 .5em}
+  main h4{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brass);margin:1.7em 0 .5em}
+  main h2:target,main h3:target{scroll-margin-top:20px}
+
+  main ul,main ol{margin:1em 0;padding-left:1.5em;font-family:var(--serif);font-size:16.5px}
+  main li{margin:.45em 0;padding-left:.25em;line-height:1.7}
+  main li::marker{color:var(--brass-dim)}
+  main ul ul,main ol ol{margin:.3em 0}
+
+  main code{font-family:var(--mono);font-size:.82em;color:#EBD9B6;background:var(--ink2);
+    padding:2px 6px;border-radius:5px;border:1px solid var(--line)}
+  main pre{background:linear-gradient(180deg,var(--ink2),#12141d);border:1px solid var(--line);
+    border-radius:var(--r-md);padding:16px 18px;overflow:auto;line-height:1.55;margin:1.4em 0;
+    box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+  main pre code{background:none;border:none;padding:0;color:#C9CEDF;font-size:12.5px}
+
+  main blockquote{margin:1.5em 0;padding:6px 22px;border-left:3px solid var(--brass);
+    background:linear-gradient(90deg,rgba(227,165,82,.06),transparent);border-radius:0 var(--r-md) var(--r-md) 0}
+  main blockquote p{color:var(--text);font-size:17px;font-style:italic}
+
+  .table-wrap{margin:1.5em 0;border:1px solid var(--line);border-radius:var(--r-md);overflow:auto}
+  main table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:min(100%,520px)}
+  main thead{background:var(--ink2)}
+  main th{text-align:left;padding:11px 14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--brass);border-bottom:1px solid var(--line2);white-space:nowrap}
+  main td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:#D3D1C9;
+    font-family:var(--serif);font-size:14.5px;line-height:1.6}
+  main tbody tr:last-child td{border-bottom:none}
+  main tbody tr:hover td{background:rgba(255,255,255,.018)}
+
+  main hr{border:none;height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:2.4em 0}
+  main img{max-width:100%;height:auto;border-radius:var(--r-md);border:1px solid var(--line)}
+  main input[type=checkbox]{accent-color:var(--brass);margin-right:8px;transform:translateY(1px)}
+
+  .foot{max-width:68ch;margin:56px 0 0;border-top:1px solid var(--line);padding-top:16px;
+    font-family:var(--mono);font-size:10.5px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap}
+  .foot .dot{color:var(--line2)}
+
+  @media (prefers-reduced-motion:no-preference){
+    .hero,.toc{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+    .toc{animation-delay:.05s}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  }
+  @media (max-width:600px){
+    .hero{padding-top:44px}
+    .standfirst{font-size:16.5px}
+  }
 
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="doc-mast">
-      <span class="eyebrow"><b>▸</b> Development Plan — Browser-Based LightBurn Clone (Near-Full Feature Parity)</span>
-      <span class="src">02-development-plan.md</span>
-    </div>
+  <div id="prog"></div>
+  <div class="page">
+    <header class="hero">
+      <div class="kicker">DOCS</div>
+      <h1 class="title">Development Plan — Browser-Based LightBurn Clone (Near-Full Feature Parity)</h1>
+      
+      <div class="meta"><span>12 sections</span><span class="dot">·</span><span class="read">~13 min read</span><span class="dot">·</span><span>02-development-plan.md</span></div>
+    </header>
+    <details class="toc" open><summary>On this page</summary><nav><a href="#0-how-to-read-this-plan"><span class="n">01</span><span>0. How to read this plan</span></a><a href="#1-architecture"><span class="n">02</span><span>1. Architecture</span></a><a class="lvl3" href="#11-high-level-topology">1.1 High-level topology</a><a class="lvl3" href="#12-key-architectural-rules">1.2 Key architectural rules</a><a class="lvl3" href="#13-monorepo-layout">1.3 Monorepo layout</a><a href="#2-tech-stack-decisions-not-options"><span class="n">03</span><span>2. Tech stack (decisions, not options)</span></a><a href="#3-team-roles"><span class="n">04</span><span>3. Team &amp;amp; roles</span></a><a href="#4-cross-cutting-foundations-built-in-m0-maintained-forever"><span class="n">05</span><span>4. Cross-cutting foundations (built in M0, maintained forever)</span></a><a href="#5-milestone-roadmap"><span class="n">06</span><span>5. Milestone roadmap</span></a><a class="lvl3" href="#m0-foundations-weeks-16">M0 — Foundations (weeks 1–6)</a><a class="lvl3" href="#m1-design-vector-engine-weeks-516-overlaps-m0">M1 — Design &amp;amp; vector engine (weeks 5–16, overlaps M0)</a><a class="lvl3" href="#m2-cam-core-g-code-weeks-1424">M2 — CAM core &amp;amp; G-code (weeks 14–24)</a><a class="lvl3" href="#m3-grbl-real-time-control-weeks-2230-mvp-first-commercial-release-candidate">M3 — GRBL real-time control (weeks 22–30) → MVP / first commercial release candidate</a><a class="lvl3" href="#m4-the-agent-ruida-dsp-weeks-3046">M4 — The Agent + Ruida DSP (weeks 30–46)</a><a class="lvl3" href="#m5-camera-alignment-lens-correction-weeks-4054-overlaps-m4">M5 — Camera alignment &amp;amp; lens correction (weeks 40–54, overlaps M4)</a><a class="lvl3" href="#m6-image-engraving-parity-weeks-4656">M6 — Image engraving parity (weeks 46–56)</a><a class="lvl3" href="#m7-galvo-fiber-weeks-5472">M7 — Galvo / fiber (weeks 54–72)</a><a class="lvl3" href="#m8-print-and-cut-rotary-polish-advanced-workflows-weeks-6678">M8 — Print-and-cut, rotary polish, advanced workflows (weeks 66–78)</a><a class="lvl3" href="#m9-parity-hardening-ga-weeks-7490">M9 — Parity hardening &amp;amp; GA (weeks 74–90+)</a><a href="#6-timeline-summary"><span class="n">07</span><span>6. Timeline summary</span></a><a href="#7-feature-parity-checklist-the-how-close-contract"><span class="n">08</span><span>7. Feature-parity checklist (the &quot;how close&quot; contract)</span></a><a href="#8-testing-release-engineering"><span class="n">09</span><span>8. Testing &amp;amp; release engineering</span></a><a href="#9-commercialization-workstream-parallel-product-not-engineering"><span class="n">10</span><span>9. Commercialization workstream (parallel, product not engineering)</span></a><a href="#10-risk-register-top-items-mitigations"><span class="n">11</span><span>10. Risk register (top items + mitigations)</span></a><a href="#11-immediate-next-steps-first-30-days"><span class="n">12</span><span>11. Immediate next steps (first 30 days)</span></a><a class="lvl3" href="#parity-honesty-statement">Parity honesty statement</a></nav></details>
     <main>
-<h1 id="development-plan-browser-based-lightburn-clone-near-full-feature-parity">Development Plan — Browser-Based LightBurn Clone (Near-Full Feature Parity)</h1>
 <p><strong>Project:</strong> LaserKerf (laserkerf.io) — do not use the "LightBurn" trademark, logo, icons, or copied UI art<br>
 <strong>Target:</strong> Offline-first installable PWA + signed native companion agent, matching LightBurn as closely as practical.<br>
 <strong>Model:</strong> Commercial. Perpetual license + annual updates, or subscription.<br>
@@ -160,7 +234,7 @@
 <p>Single monorepo (pnpm + Turborepo or Nx). Protocol logic is authored once and shared between the App (TS/WASM) and the Agent (Rust) via a codegen'd spec where feasible, to avoid drift.</p>
 <hr>
 <h2 id="2-tech-stack-decisions-not-options">2. Tech stack (decisions, not options)</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Concern</th>
@@ -255,7 +329,7 @@
 <td>Win/macOS/Linux agents</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Explicitly rejected:</strong> Electron for the main app (defeats the web/offline differentiation); CGAL/WASM (WASM lacks FP rounding-mode control, breaks its exact arithmetic — and 2D laser CAM doesn't need B-rep); WebUSB as the <em>primary</em> GRBL path (Web Serial is cleaner; WebUSB reserved for galvo).</p>
 <hr>
 <h2 id="3-team-roles">3. Team &amp; roles</h2>
@@ -317,7 +391,7 @@
 <strong>Exit:</strong> parity checklist (§7) ≥90% "at parity"; no P0/P1 open; <strong>General Availability.</strong></p>
 <hr>
 <h2 id="6-timeline-summary">6. Timeline summary</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Milestone</th>
@@ -394,7 +468,7 @@
 <td>30–36 mo</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Two commercial gates:</strong> a <strong>GRBL product at ~month 7</strong> (revenue + real-user feedback funds the rest) and <strong>near-full-parity GA at ~months 22–24</strong>, with the final 10% of parity treated as continuous.</p>
 <hr>
 <h2 id="7-feature-parity-checklist-the-how-close-contract">7. Feature-parity checklist (the "how close" contract)</h2>
@@ -419,145 +493,4 @@
 - 🟡 Galvo job export — M7</p>
 <p><strong>Image engraving</strong><br>
 - 🟡 All 10 dither modes (Floyd–Steinberg, Jarvis, Stucki, Atkinson, ordered, newsprint, halftone, sketch, grayscale, threshold) — M6 (WASM)<br>
-- 🟡 Pass-through, negative, overscan, ramp, Z-offset, scan angle — M6<br>
-- 🔴 Grayscale/3D depth (power modulation accuracy tied to device) — M6</p>
-<p><strong>Device control</strong><br>
-- ✅ GRBL family (GRBL, M3, LPC, Smoothie, Marlin, Cohesion3D) — M3 (Web Serial)<br>
-- 🔴 Ruida DSP (+ Trocen, TopWisdom) — M4 (Agent, UDP)<br>
-- 🔴 Galvo/fiber (EZCAD2/BJJCZ) — M7 (Agent, USB)<br>
-- ✅ Jog, frame, home, feed-hold/resume, console — M3</p>
-<p><strong>Advanced</strong><br>
-- 🔴 Camera alignment + fisheye lens correction — M5 (OpenCV.js)<br>
-- ✅ Print-and-cut registration — M8<br>
-- 🟡 Rotary (chuck/roller) across GRBL/DSP/galvo — M4/M7/M8<br>
-- ✅ Job restart/continue, tiling — M8</p>
-<p><strong>Platform</strong><br>
-- ✅ Full offline PWA — M0<br>
-- ✅ Project storage (OPFS + IndexedDB) — M0<br>
-- 🟡 Cross-OS Agent (signed, auto-update) — M4<br>
-- 🔴 Chromium-only reach (no Safari/iOS; shaky Firefox) — <strong>structural, not fixable</strong></p>
-<p><strong>Parity target for GA:</strong> every ✅ and 🟡 at parity; 🔴 items at "works on mainstream hardware, edge cases tracked." The Chromium-only limit is the one permanent gap versus a native app — mitigated by the offline PWA + optional native Agent, which together restore cross-platform desktop coverage.</p>
-<hr>
-<h2 id="8-testing-release-engineering">8. Testing &amp; release engineering</h2>
-<ul>
-<li><strong>Golden-output CAM tests</strong> — byte/tolerance match on emitted machine code; run on every PR. The single most important guardrail.</li>
-<li><strong>Protocol conformance</strong> — per controller, against emulators (MeerK40t Ruida emulator, captured EZCAD2/Ruida traffic) and real HIL runners before each hardware milestone.</li>
-<li><strong>Offline invariant</strong> — Playwright with network blocked post-install; must pass full design→simulate.</li>
-<li><strong>HIL soak tests</strong> — multi-hour real engraves on GRBL/Ruida/galvo to catch buffer stalls and jitter.</li>
-<li><strong>Coordinate/units regression</strong> — matrix over mm/inch, origins, transforms.</li>
-<li><strong>Visual regression</strong> — dither outputs and renderer diffed against stored references.</li>
-<li><strong>Cross-OS Agent CI</strong> — build, sign, and smoke-test installers on Win/macOS/Linux.</li>
-<li><strong>Release channels</strong> — dev → beta → stable for both App (SW update flow) and Agent (auto-update), version-negotiated so an old Agent + new App degrade gracefully.</li>
-</ul>
-<hr>
-<h2 id="9-commercialization-workstream-parallel-product-not-engineering">9. Commercialization workstream (parallel, product not engineering)</h2>
-<ul>
-<li><strong>Licensing/DRM:</strong> server-issued signed licenses with an <strong>offline grace period</strong> (must not break the offline promise); tiering that mirrors the market anchor (a "Core"-equivalent GCode tier, a "Pro"-equivalent DSP+galvo tier). Price at or just below LightBurn (Core $99 / Pro $199 / $40-yr updates).</li>
-<li><strong>Positioning:</strong> occupy the seam — cross-platform + <strong>truly offline</strong>, the thing LightBurn (desktop-only, dropped Linux) and Glowforge (cloud-locked) don't offer. Do <strong>not</strong> market on the unverified "LightBurn blocklisted cheap lasers" claim.</li>
-<li><strong>Onboarding:</strong> machine auto-detect, one-click Agent install for DSP/galvo, camera setup wizard, import-your-LightBurn-project path.</li>
-<li><strong>Docs</strong> are a parity feature — LightBurn's documentation is part of its moat. Technical writer from M2.</li>
-</ul>
-<hr>
-<h2 id="10-risk-register-top-items-mitigations">10. Risk register (top items + mitigations)</h2>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Risk</th>
-<th>Likelihood</th>
-<th>Impact</th>
-<th>Mitigation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Raw UDP impossible in browser → Ruida needs Agent</td>
-<td>Certain</td>
-<td>High</td>
-<td>Architected in from M0; Agent is a planned artifact, not a patch</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Chromium-only reach shrinks TAM</td>
-<td>Certain</td>
-<td>Med</td>
-<td>Clear messaging; PWA+Agent restores desktop cross-platform; revisit Firefox as it stabilizes</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Camera lens-correction accuracy in WASM</td>
-<td>Med</td>
-<td>High</td>
-<td>Dedicated CV engineer; OpenCV.js proven; buffer M5; validate vs real bed early</td>
-</tr>
-<tr>
-<td>4</td>
-<td>In-browser streaming jitter (GC/tab throttle)</td>
-<td>Med</td>
-<td>High</td>
-<td>Worker + character-counting; HIL soak tests gate M3 ship</td>
-</tr>
-<tr>
-<td>5</td>
-<td>USB driver-claim battles (WebUSB vs kernel/FTDI; Zadig)</td>
-<td>High</td>
-<td>Med</td>
-<td>Route USB DSP/galvo through Agent (libusb/WinUSB); WebUSB only as fallback</td>
-</tr>
-<tr>
-<td>6</td>
-<td>CAM regressions erode trust</td>
-<td>Med</td>
-<td>High</td>
-<td>Golden-output tests on every PR</td>
-</tr>
-<tr>
-<td>7</td>
-<td>Protocol RE gaps / firmware variants</td>
-<td>Med</td>
-<td>Med</td>
-<td>Lean on MeerK40t/galvoplotter references; conformance suites; ship common models first</td>
-</tr>
-<tr>
-<td>8</td>
-<td>Legal (trademark/DMCA/patents)</td>
-<td>Low–Med</td>
-<td>High</td>
-<td>Clean-room; RE the <em>machine</em> protocol not LightBurn; avoid encrypted-handshake circumvention; USPTO patent clearance before GA; IP counsel</td>
-</tr>
-<tr>
-<td>9</td>
-<td>Scope/timeline blow-out chasing last 10% parity</td>
-<td>High</td>
-<td>Med</td>
-<td>Ship GRBL MVP at M3 for revenue; treat long-tail parity as continuous, not a gate</td>
-</tr>
-<tr>
-<td>10</td>
-<td>Agent security (localhost bridge as attack surface)</td>
-<td>Med</td>
-<td>High</td>
-<td>Origin-locked WSS, token pairing, signed binary, no arbitrary command exec, security review</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<h2 id="11-immediate-next-steps-first-30-days">11. Immediate next steps (first 30 days)</h2>
-<ol>
-<li>Stand up the monorepo, CI, and the offline PWA shell (M0 start).</li>
-<li>Build the <code>Device</code> abstraction + fake device + golden-output harness <strong>before</strong> any feature code.</li>
-<li>Spike the WASM geometry pipeline: Clipper2 boolean/offset round-trip in a Worker.</li>
-<li>Spike Web Serial character-counting against one real GRBL board to de-risk M3 early.</li>
-<li>Acquire HIL hardware (GRBL board now; Ruida + galvo boards ordered for M4/M7) and stand up the MeerK40t Ruida emulator.</li>
-<li>Kick off IP counsel engagement and a USPTO patent clearance search.</li>
-<li>Lock the <code>.laserkerf</code> format v1 and the <code>.lbrn</code> import mapping.</li>
-</ol>
-<hr>
-<h3 id="parity-honesty-statement">Parity honesty statement</h3>
-<p>Full 1:1 parity with a mature, 8-year native app is an asymptote, not a milestone. This plan delivers a <strong>shippable GRBL product in ~7 months</strong> and <strong>near-full parity (≥90% of the checklist, all three hardware classes) in ~22–24 months</strong>, with two permanent structural differences from LightBurn: <strong>Chromium-only</strong> browser reach, and a <strong>native companion Agent</strong> for DSP/galvo. Both are inherent to doing this on the web — and both are offset by the one thing this product has that LightBurn and Glowforge don't: a genuinely cross-platform, fully offline web app.</p>
-    </main>
-    <div class="doc-foot">house-style · converted from 02-development-plan.md · self-contained · bin/md2html.py</div>
-  </div>
-</body>
-</html>
+- 🟡 Pass-through, negative, overscan, ramp, Z-of

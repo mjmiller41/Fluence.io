@@ -32,61 +32,135 @@
     --sans:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
 
+  :root{--serif:"Charter","Iowan Old Style","Palatino Linotype",Palatino,Georgia,Cambria,serif}
   *{box-sizing:border-box}
-  html{scrollbar-width:thin;scrollbar-color:var(--line) var(--ink)}
-  ::-webkit-scrollbar{width:10px;height:10px}
+  html{scrollbar-width:thin;scrollbar-color:var(--line) var(--ink);scroll-behavior:smooth}
+  ::-webkit-scrollbar{width:11px;height:11px}
   ::-webkit-scrollbar-track{background:var(--ink)}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid var(--ink)}
-  html,body{margin:0;background:var(--ink);color:var(--text);
-    font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased}
-  body{background:radial-gradient(760px 300px at 50% -140px,rgba(227,165,82,.07),transparent 70%),var(--ink);
-    padding:26px 18px 80px;font-size:14.5px}
-  .wrap{max-width:800px;margin:0 auto}
-  .doc-mast{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-    border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px}
-  .doc-mast .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--faint)}
-  .doc-mast .eyebrow b{color:var(--brass)}
-  .doc-mast .src{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
-  main h1,main h2,main h3,main h4{font-weight:800;letter-spacing:-.01em;line-height:1.25;color:var(--text)}
-  main h1{font-size:26px;margin:.2em 0 .5em}
-  main h2{font-size:20px;margin:1.7em 0 .5em;border-top:1px solid var(--line);padding-top:.8em}
-  main h3{font-size:16px;margin:1.4em 0 .4em}
-  main h4{font-size:13px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-  main p{margin:.7em 0;color:var(--text)}
-  main a{color:var(--brass);text-decoration:none}
-  main a:hover{text-decoration:underline}
-  main strong{color:#fff}
-  main ul,main ol{margin:.6em 0;padding-left:1.4em}
-  main li{margin:.28em 0}
-  main li::marker{color:var(--faint)}
-  main code{font-family:var(--mono);font-size:.86em;color:#C9CEDF;background:var(--ink2);
-    padding:1px 5px;border-radius:4px}
-  main pre{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r-md);
-    padding:13px 15px;overflow:auto;line-height:1.5}
-  main pre code{background:none;padding:0;color:#C9CEDF;font-size:12px}
-  main blockquote{margin:1em 0;border-left:3px solid var(--brass-dim);background:var(--ink2);
-    border-radius:0 var(--r-md) var(--r-md) 0;padding:2px 16px;color:var(--muted)}
-  main table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13px;display:block;overflow-x:auto}
-  main th,main td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
-  main th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
-  main tr:hover td{background:var(--ink2)}
-  main hr{border:none;border-top:1px solid var(--line);margin:1.8em 0}
-  main img{max-width:100%;border-radius:var(--r-md)}
-  main input[type=checkbox]{accent-color:var(--brass);margin-right:6px}
-  .doc-foot{margin-top:44px;border-top:1px solid var(--line);padding-top:14px;
-    font-family:var(--mono);font-size:10px;color:var(--faint)}
+  ::-webkit-scrollbar-thumb:hover{background:var(--line2)}
+  html,body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans)}
+  body{font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 420px at 15% -260px,rgba(227,165,82,.12),transparent 60%),
+      radial-gradient(900px 500px at 100% -60px,rgba(124,140,224,.06),transparent 55%),
+      var(--ink);
+    padding:0 20px 96px}
+  ::selection{background:rgba(227,165,82,.28);color:#fff}
+
+  /* reading-progress rail */
+  #prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--brass-dim),var(--brass));
+    z-index:50;transition:width .08s linear}
+
+  .page{max-width:720px;margin:0 auto}
+
+  /* ---------------- hero ---------------- */
+  .hero{padding:66px 0 28px;border-bottom:1px solid var(--line);margin-bottom:8px;position:relative}
+  .kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--brass);margin-bottom:22px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--brass-dim)}
+  h1.title{font-size:clamp(31px,6.4vw,46px);line-height:1.04;font-weight:800;letter-spacing:-.022em;
+    margin:0 0 .5em;color:#fff;text-wrap:balance}
+  .standfirst{font-size:18.5px;line-height:1.58;color:var(--muted);font-weight:400;margin:0;max-width:58ch;
+    padding-left:16px;border-left:2px solid var(--brass-dim)}
+  .standfirst strong{color:var(--text);font-weight:600}
+  .hero .meta{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--faint);
+    display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .hero .meta .dot{color:var(--line2)}
+  .hero .meta .read{color:var(--brass-dim)}
+
+  /* ---------------- table of contents ---------------- */
+  .toc{margin:28px 0 8px;background:linear-gradient(180deg,var(--ink2),var(--surface));
+    border:1px solid var(--line);border-radius:var(--r-lg);padding:6px 18px 14px}
+  .toc>summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint);padding:12px 0 8px;display:flex;align-items:center;gap:9px}
+  .toc>summary::-webkit-details-marker{display:none}
+  .toc>summary::before{content:"▸";color:var(--brass);transition:transform .18s}
+  .toc[open]>summary::before{transform:rotate(90deg)}
+  .toc nav{display:flex;flex-direction:column;gap:1px;padding-top:4px}
+  .toc a{display:flex;gap:12px;text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 10px 6px 8px;
+    border-radius:6px;border-left:2px solid transparent;transition:color .12s,border-color .12s}
+  .toc a .n{font-family:var(--mono);font-size:11px;color:var(--faint);min-width:22px}
+  .toc a.lvl3{padding-left:33px;font-size:12.5px;color:var(--faint)}
+  .toc a:hover{color:var(--brass)}
+  .toc a.active{color:#fff;border-left-color:var(--brass);background:rgba(227,165,82,.06)}
+  .toc a.active .n{color:var(--brass)}
+
+  /* ---------------- article ---------------- */
+  main{padding-top:14px;counter-reset:sec}
+  main>*{max-width:68ch}
+  main p{margin:1.05em 0;color:#DDDBD2;font-family:var(--serif);font-size:16.5px;line-height:1.78}
+  main a{color:var(--brass);text-decoration:none;border-bottom:1px solid rgba(227,165,82,.35)}
+  main a:hover{border-bottom-color:var(--brass)}
+  main strong{color:#fff;font-weight:600}
+  main em{color:var(--text)}
+
+  main h2{counter-increment:sec;font-size:25px;font-weight:800;letter-spacing:-.015em;line-height:1.18;color:#fff;
+    margin:2.5em 0 .7em;padding-top:1.2em;border-top:1px solid var(--line)}
+  main h2::before{content:counter(sec,decimal-leading-zero);display:block;font-family:var(--mono);
+    font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--brass);margin-bottom:.7em}
+  main h3{font-size:18px;font-weight:700;color:var(--text);margin:2em 0 .5em}
+  main h4{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brass);margin:1.7em 0 .5em}
+  main h2:target,main h3:target{scroll-margin-top:20px}
+
+  main ul,main ol{margin:1em 0;padding-left:1.5em;font-family:var(--serif);font-size:16.5px}
+  main li{margin:.45em 0;padding-left:.25em;line-height:1.7}
+  main li::marker{color:var(--brass-dim)}
+  main ul ul,main ol ol{margin:.3em 0}
+
+  main code{font-family:var(--mono);font-size:.82em;color:#EBD9B6;background:var(--ink2);
+    padding:2px 6px;border-radius:5px;border:1px solid var(--line)}
+  main pre{background:linear-gradient(180deg,var(--ink2),#12141d);border:1px solid var(--line);
+    border-radius:var(--r-md);padding:16px 18px;overflow:auto;line-height:1.55;margin:1.4em 0;
+    box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+  main pre code{background:none;border:none;padding:0;color:#C9CEDF;font-size:12.5px}
+
+  main blockquote{margin:1.5em 0;padding:6px 22px;border-left:3px solid var(--brass);
+    background:linear-gradient(90deg,rgba(227,165,82,.06),transparent);border-radius:0 var(--r-md) var(--r-md) 0}
+  main blockquote p{color:var(--text);font-size:17px;font-style:italic}
+
+  .table-wrap{margin:1.5em 0;border:1px solid var(--line);border-radius:var(--r-md);overflow:auto}
+  main table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:min(100%,520px)}
+  main thead{background:var(--ink2)}
+  main th{text-align:left;padding:11px 14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--brass);border-bottom:1px solid var(--line2);white-space:nowrap}
+  main td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:#D3D1C9;
+    font-family:var(--serif);font-size:14.5px;line-height:1.6}
+  main tbody tr:last-child td{border-bottom:none}
+  main tbody tr:hover td{background:rgba(255,255,255,.018)}
+
+  main hr{border:none;height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:2.4em 0}
+  main img{max-width:100%;height:auto;border-radius:var(--r-md);border:1px solid var(--line)}
+  main input[type=checkbox]{accent-color:var(--brass);margin-right:8px;transform:translateY(1px)}
+
+  .foot{max-width:68ch;margin:56px 0 0;border-top:1px solid var(--line);padding-top:16px;
+    font-family:var(--mono);font-size:10.5px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap}
+  .foot .dot{color:var(--line2)}
+
+  @media (prefers-reduced-motion:no-preference){
+    .hero,.toc{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+    .toc{animation-delay:.05s}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  }
+  @media (max-width:600px){
+    .hero{padding-top:44px}
+    .standfirst{font-size:16.5px}
+  }
 
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="doc-mast">
-      <span class="eyebrow"><b>▸</b> DEPLOY.md — LaserKerf (instructions for claude-code)</span>
-      <span class="src">DEPLOY.md</span>
-    </div>
+  <div id="prog"></div>
+  <div class="page">
+    <header class="hero">
+      <div class="kicker">LASERKERF.IO</div>
+      <h1 class="title">DEPLOY.md — LaserKerf (instructions for claude-code)</h1>
+      
+      <div class="meta"><span>8 sections</span><span class="dot">·</span><span class="read">~5 min read</span><span class="dot">·</span><span>DEPLOY.md</span></div>
+    </header>
+    <details class="toc" open><summary>On this page</summary><nav><a href="#shared-box-proxy-coordination-contract-read-first-do-not-skip"><span class="n">01</span><span>Shared box — proxy coordination contract (READ FIRST, do not skip)</span></a><a href="#access-hostinger-mcp-or-ssh"><span class="n">02</span><span>Access: Hostinger MCP or SSH</span></a><a href="#one-time-setup-skip-steps-another-operator-already-did"><span class="n">03</span><span>One-time setup (skip steps another operator already did)</span></a><a href="#deploy-update"><span class="n">04</span><span>Deploy / update</span></a><a href="#verify"><span class="n">05</span><span>Verify</span></a><a href="#tag-rollback"><span class="n">06</span><span>Tag + rollback</span></a><a href="#phase-b-licensingaccounts-api-not-built-yet-inf-t01-inf-t03"><span class="n">07</span><span>Phase B — licensing/accounts API (not built yet: INF-T01 / INF-T03)</span></a><a href="#functional-stack-files-do-not-delete-these-are-the-deploy"><span class="n">08</span><span>Functional stack files (do not delete — these ARE the deploy)</span></a></nav></details>
     <main>
-<h1 id="deploymd-laserkerf-instructions-for-claude-code">DEPLOY.md — LaserKerf (instructions for claude-code)</h1>
 <blockquote>
 <p><strong>Audience: claude-code performing the deploy.</strong> This is the single source of truth for<br>
 deploying LaserKerf. Deploy is done from the box via <strong>Hostinger MCP or SSH</strong> (both available).<br>
@@ -101,7 +175,7 @@ must stay green through deploy.</p>
 <hr>
 <h2 id="shared-box-proxy-coordination-contract-read-first-do-not-skip">Shared box — proxy coordination contract (READ FIRST, do not skip)</h2>
 <p>This Hostinger KVM 2 hosts <strong>two independent tenants</strong>:</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Tenant</th>
@@ -127,7 +201,7 @@ must stay green through deploy.</p>
 <td><code>laserready.io</code>, <code>www.laserready.io</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Shared infrastructure — owned jointly, coordinate before touching:</strong></p>
 <ul>
 <li>One Docker network literally named <strong><code>proxy</code></strong> (external). Both tenants attach to it. <strong>Never delete or recreate it.</strong> (LaserKerf's compose calls it <code>shared_proxy</code> but binds <code>name: proxy</code> to this one network.)</li>
@@ -183,84 +257,4 @@ must stay green through deploy.</p>
 <li><strong>Clone + build the PWA bundle</strong> (the WASM toolchain isn't in the image — build locally/CI):</li>
 </ol>
 <p><code>bash
-   cd /srv &amp;&amp; git clone git@github.com:mjmiller41/LaserKerf.io.git laserkerf &amp;&amp; cd laserkerf
-   pnpm install --frozen-lockfile
-   pnpm --filter web build            # emits apps/web/dist (rebuild fixes the stale pre-rename dist)</code></p>
-<ol start="4">
-<li><strong>Env:</strong></li>
-</ol>
-<p><code>bash
-   cd apps/deploy/laserkerf &amp;&amp; cp .env.example .env    # set TAG; Phase B secrets stay commented</code></p>
-<ol start="5">
-<li><strong>DNS:</strong> ensure <code>laserkerf.io</code>, <code>www.laserkerf.io</code>, <code>app.laserkerf.io</code> resolve to the box IP (via the Hostinger MCP DNS tools) before the first Caddy reload.</li>
-</ol>
-<hr>
-<h2 id="deploy-update">Deploy / update</h2>
-<pre><code class="language-bash">cd /srv/laserkerf
-git pull
-pnpm install --frozen-lockfile &amp;&amp; pnpm --filter web build     # rebuild dist
-cd apps/deploy/laserkerf
-# bump TAG in .env
-docker compose --env-file .env up -d --build
-docker compose --env-file .env ps                             # laserkerf-web healthy? (cpus 0.25 / mem 256m)
-</code></pre>
-<p><strong>Add/confirm LaserKerf's route in the shared Caddy</strong> (only if the block isn't already present). Append to <code>/srv/shared/Caddyfile</code>, leaving LaserReady's block untouched:</p>
-<pre><code class="language-caddy">laserkerf.io, www.laserkerf.io, app.laserkerf.io {
-    encode gzip
-    reverse_proxy laserkerf-web:8000
-    header {
-        Strict-Transport-Security &quot;max-age=31536000; includeSubDomains&quot;
-        X-Content-Type-Options &quot;nosniff&quot;
-        Referrer-Policy &quot;strict-origin-when-cross-origin&quot;
-    }
-}
-</code></pre>
-<p>Then, from the box:</p>
-<pre><code class="language-bash">docker exec shared-caddy caddy validate --config /etc/caddy/Caddyfile
-docker exec shared-caddy caddy reload   --config /etc/caddy/Caddyfile   # zero-downtime; never `restart`
-</code></pre>
-<p>The service worker is versioned, so installed PWAs update on next launch while old clients keep working offline.</p>
-<hr>
-<h2 id="verify">Verify</h2>
-<pre><code class="language-bash">curl -s https://laserkerf.io | grep -o '&lt;title&gt;[^&lt;]*'                          # serves the app
-curl -s -o /dev/null -w 'app %{http_code}\n' https://app.laserkerf.io          # 200
-curl -s -o /dev/null -w 'laserready.io %{http_code}\n' https://laserready.io    # neighbor still 200
-</code></pre>
-<p>Then in a browser: load <code>https://app.laserkerf.io</code>, install the PWA, <strong>cut the network</strong>, and confirm the app still loads — the offline invariant must survive deployment.</p>
-<hr>
-<h2 id="tag-rollback">Tag + rollback</h2>
-<pre><code class="language-bash">git tag -a v0.x.y -m &quot;What this deploy contains&quot; &amp;&amp; git push origin --tags
-
-# rollback = redeploy previous tag (LaserKerf only; never touch the neighbor)
-git checkout &lt;last-good-tag&gt;
-pnpm install --frozen-lockfile &amp;&amp; pnpm --filter web build
-cd apps/deploy/laserkerf &amp;&amp; docker compose --env-file .env up -d --build
-</code></pre>
-<hr>
-<h2 id="phase-b-licensingaccounts-api-not-built-yet-inf-t01-inf-t03">Phase B — licensing/accounts API (not built yet: INF-T01 / INF-T03)</h2>
-<p>When <code>laserkerf-api</code> exists, extend the deploy:</p>
-<ol>
-<li><strong>Add Postgres to <code>/srv/shared/docker-compose.yml</code></strong> (<code>shared-postgres</code>, network alias <code>postgres</code>, its own <code>pg_data</code> volume, no host ports).</li>
-<li><strong>Create the <code>laserkerf</code> DB + role</strong> (no cross-DB access):</li>
-</ol>
-<p><code>bash
-   docker exec -i shared-postgres psql -U postgres &lt;&lt;'SQL'
-   CREATE ROLE laserkerf WITH LOGIN PASSWORD 'CHANGE_ME_STRONG';
-   CREATE DATABASE laserkerf OWNER laserkerf;
-   REVOKE ALL ON DATABASE laserkerf FROM PUBLIC;
-   SQL</code></p>
-<ol start="3">
-<li><strong>Add <code>laserkerf-api</code> (+ optional <code>laserkerf-redis</code>)</strong> to <code>apps/deploy/laserkerf/docker-compose.yml</code> on ports 8001/8002 (internal), explicit caps (api <code>0.75</code>/<code>768m</code>, redis <code>0.10</code>/<code>128m</code>); set <code>DATABASE_URL</code>, <code>LICENSE_SIGNING_KEY</code> (back up out of band — unrecoverable if lost), <code>STRIPE_WEBHOOK_SECRET</code> in <code>.env</code>.</li>
-<li><strong>Run migrations against the <code>laserkerf</code> DB only</strong>, then <code>up -d</code>.</li>
-<li><strong>Uncomment the Phase B Caddy routes</strong> (<code>api.laserkerf.io</code> → <code>laserkerf-api:8001</code>, <code>downloads.laserkerf.io</code> → <code>laserkerf-web:8000</code>) and reload Caddy once.</li>
-<li><strong>Nightly <code>pg_dump</code></strong> of the <code>laserkerf</code> DB into <code>/backups/laserkerf/</code>.</li>
-</ol>
-<p>The realistic pressure once Phase B is live is <strong>Agent-download bandwidth/disk</strong> on the shared NVMe, not CPU/RAM — prune old Agent versions, then move <code>/downloads</code> to object storage + CDN, then split to a dedicated box.</p>
-<hr>
-<h2 id="functional-stack-files-do-not-delete-these-are-the-deploy">Functional stack files (do not delete — these ARE the deploy)</h2>
-<p><code>apps/deploy/laserkerf/docker-compose.yml</code> · <code>Dockerfile</code> · <code>nginx.conf</code> · <code>Caddyfile.snippet</code> · <code>.env.example</code></p>
-    </main>
-    <div class="doc-foot">house-style · converted from DEPLOY.md · self-contained · bin/md2html.py</div>
-  </div>
-</body>
-</html>
+   cd /srv &amp;&amp; git clone git@github.com:mjmiller41/LaserKerf.io.git laserkerf &amp;&amp; cd laser
