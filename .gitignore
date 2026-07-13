@@ -41,3 +41,6 @@ blob-report/         # playwright
 # emcc-generated build dir; the prebuilt vendor/ artifact IS tracked
 packages/geometry-wasm/wasm-build/
 .gstack/
+
+# Claude local
+.claude/
