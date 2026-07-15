@@ -1,0 +1,10 @@
+title = "Conductor gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Conductor allowlist"
+paths = [
+  '''\.conductor/secrets\.yaml''',
+]

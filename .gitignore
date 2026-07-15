@@ -44,3 +44,17 @@ packages/geometry-wasm/wasm-build/
 
 # Claude local
 .claude/
+# >>> conductor-baseline (managed — do not edit between markers)
+.env*
+*.key
+*.pem
+*_rsa
+*_ssh_access
+.hostinger_ssh_access
+*.p12
+*.pfx
+secrets.local.*
+.worktrees/
+__pycache__/
+*.pyc
+# <<< conductor-baseline
